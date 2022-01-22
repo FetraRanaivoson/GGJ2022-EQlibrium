@@ -12,6 +12,8 @@ public class PlayerController : NetworkBehaviour
     PlayerUI playerUI;
     SharedUI sharedUI;
 
+    public GameObject pawnPrefab;
+
     /// <summary>
     /// The name that identifies this player on the network
     /// </summary>
@@ -86,12 +88,83 @@ public class PlayerController : NetworkBehaviour
         sharedUI.OnNotLoadingScreen();
     }
 
+    /// <summary>
+    /// The current mouse position of this player
+    /// </summary>
+    [SyncVar] public Vector3 mousePos = Vector3.zero;
+
+    /// <summary>
+    /// The handler for synchronizing this player's current mouse position
+    /// </summary>
+    [Server]
+    public void SetMousePos(Vector3 mousePos)
+    {
+        this.mousePos = mousePos;
+    }
+
+    /// <summary>
+    /// The method to be called by this player to synchronize his mouse position
+    /// value across the network
+    /// </summary>
+    /// <param name="mousePos"></param>
+    [Command(requiresAuthority = false)]
+    public void CmdSetMousePos(Vector3 mousePos)
+    {
+        SetMousePos(mousePos);
+    }
+
+    /// <summary>
+    /// The property that returns the mouse position of this player but NOT SYNCED
+    /// </summary>
+    /// <returns></returns>
+    private Vector3 MousePosition => Mouse.current.position.ReadValue(); 
+
 
     [ClientCallback]
     void Update()
     {
+        if (!hasAuthority)
+        {
+            return;
+        }
 
+        CmdSetMousePos(this.MousePosition);
+
+
+        if (!Mouse.current.rightButton.wasPressedThisFrame) { return; }
+        Ray ray = Camera.main.ScreenPointToRay(mousePos);
+        Debug.DrawRay(ray.origin, ray.direction * 50, Color.red);
+        if (!Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, LayerMask.GetMask("Table")))
+        {
+            return;
+        }
+
+        PlacePawn(hit.point + Vector3.up * .35f);
     }
 
+    private void PlacePawn(Vector3 hitPoint)
+    {
+        CmdPlacePawn(hitPoint);
+    }
 
+    [Command]
+    private void CmdPlacePawn(Vector3 hitPoint)
+    {
+        SrvPlacePawn(hitPoint);
+    }
+
+    [Server]
+    public void SrvPlacePawn(Vector3 hitPoint)
+    {
+        //TO DO RANDOMIZE THIS
+        GameObject pawnObj = Instantiate(pawnPrefab, hitPoint, Quaternion.identity);
+        NetworkServer.Spawn(pawnObj);
+        RpcToggleGravity(pawnObj, true);
+    }
+
+    [ClientRpc]
+    public void RpcToggleGravity(GameObject pawnObj, bool state)
+    {
+        pawnObj.GetComponent<Pawn>().UseGravity(true);
+    }
 }

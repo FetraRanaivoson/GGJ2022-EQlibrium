@@ -35,4 +35,28 @@ public class GameNetworkManager : NetworkManager
         }
 
     }
+
+    private void Update()
+    {
+        //  On the shared UI, display the next object to be placed
+        
+        //  If player 1 or 2 is turn:
+        //  Get its mouse position on screen
+
+        //  Spawn the next object to be placed where the mouse position of that player is
+    
+        // Update in Player Controller:
+            // Screen point to ray: on click and if it is a table, place the base of the object
+            // at the clicked position in 3d view
+            // SYNC pawn position over the network
+        
+        //Wait to settle
+        
+        //If the table collides underneath, then the current player loses. 
+
+            //Display win / lose popup and let be a restart or quit button
+
+        //Else, switch player
+
+    }
 }

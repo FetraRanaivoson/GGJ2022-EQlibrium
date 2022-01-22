@@ -67,6 +67,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
+  pawnPrefab: {fileID: 939550387104453270, guid: 86a6ee2821b186344b6bff1c8272ba03, type: 3}
+  displayName: No name
+  mousePos: {x: 0, y: 0, z: 0}
 --- !u!114 &7074766620655772361
 MonoBehaviour:
   m_ObjectHideFlags: 0
