@@ -13,6 +13,8 @@ GameObject:
   - component: {fileID: 7336645741387773838}
   - component: {fileID: 5142240549496517418}
   - component: {fileID: 8666675120769874121}
+  - component: {fileID: -403038660298919585}
+  - component: {fileID: 7132154065750238194}
   m_Layer: 0
   m_Name: Helper
   m_TagString: Untagged
@@ -129,3 +131,29 @@ MonoBehaviour:
   showGizmos: 0
   showOverlay: 0
   overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
+--- !u!114 &-403038660298919585
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9138362324906890843}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37efc97c59579c3419658dce7e072059, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  material: {fileID: 2100000, guid: 89e26708835d1264fbe165148e949f2c, type: 2}
+--- !u!135 &7132154065750238194
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9138362324906890843}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.73
+  m_Center: {x: 0, y: 0, z: 0}

@@ -31,6 +31,15 @@ public class HelperManager : NetworkBehaviour
     }
 
     /// <summary>
+    /// The command to delete the last helper (basically the only visible) from external code
+    /// </summary>
+    [Command(requiresAuthority =false)]
+    public void CmdDeleteHelper()
+    {
+        SrvDeleteHelper(helpers[helpers.Count-1]);
+    }
+
+    /// <summary>
     /// The request command to instantiate the helper
     /// </summary>
     [Command(requiresAuthority = false)]
@@ -43,7 +52,8 @@ public class HelperManager : NetworkBehaviour
             SrvInstantiateHelper(point);
             lastMousePos = currentMousePos;
         }
-        // Then, instantiate only one at current mouse position, the last one created
+
+        // Then, keep only the last one created 
         for (int i = 0; i < helpers.Count; i++)
         {
             if (i != helpers.Count - 1 && helpers.Count > 1 && helpers[i] != null)
@@ -52,8 +62,9 @@ public class HelperManager : NetworkBehaviour
             }
         }
         // Delete last helper after a few second
-        StartCoroutine(SrvDeleteHelperAfter(2.5f));
+        //StartCoroutine(SrvDeleteHelperAfter(2.5f));
     }
+
 
     /// <summary>
     /// The server response to instantiate the helper
@@ -73,7 +84,7 @@ public class HelperManager : NetworkBehaviour
     IEnumerator SrvDeleteHelperAfter(float second)
     {
         yield return new WaitForSeconds(second);
-        if (helpers[helpers.Count - 1] != null)
+        if (helpers.Count > 0 && helpers[helpers.Count - 1] != null)
         {
             SrvDeleteHelper(helpers[helpers.Count - 1]);
         }

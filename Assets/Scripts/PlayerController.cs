@@ -132,6 +132,11 @@ public class PlayerController : NetworkBehaviour
             return;
         }
 
+        if (!NetworkClient.ready || !NetworkClient.active)
+        {
+            return;
+        }
+
         CmdSetMousePos(this.MousePosition);
 
         // The logic to place a pawn
@@ -150,9 +155,10 @@ public class PlayerController : NetworkBehaviour
         // On release right mouse button
         if (Input.GetMouseButtonUp(1))
         {
+            helperManager.CmdDeleteHelper();
             //if (!Mouse.current.rightButton.wasPressedThisFrame) { return; }
             //Ray ray = Camera.main.ScreenPointToRay(mousePos);
-            Debug.DrawRay(ray.origin, ray.direction * 50, Color.red);
+            //Debug.DrawRay(ray.origin, ray.direction * 50, Color.red);
             if (!Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, LayerMask.GetMask("Table")))
             {
                 return;
