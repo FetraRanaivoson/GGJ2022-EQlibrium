@@ -12,6 +12,7 @@ public class PlayerController : NetworkBehaviour
     PlayerUI playerUI;
     SharedUI sharedUI;
     SoundManager soundManager;
+    HelperManager helperManager;
 
     public GameObject pawnPrefab;
 
@@ -34,6 +35,7 @@ public class PlayerController : NetworkBehaviour
         cameraFreeLook = FindObjectOfType<CinemachineFreeLook>();
         sharedUI = FindObjectOfType<SharedUI>();
         soundManager = FindObjectOfType<SoundManager>();
+        helperManager = FindObjectOfType<HelperManager>();
     }
 
 
@@ -119,7 +121,7 @@ public class PlayerController : NetworkBehaviour
     /// The property that returns the mouse position of this player but NOT SYNCED
     /// </summary>
     /// <returns></returns>
-    private Vector3 MousePosition => Mouse.current.position.ReadValue(); 
+    private Vector3 MousePosition => Mouse.current.position.ReadValue();
 
 
     [ClientCallback]
@@ -133,15 +135,30 @@ public class PlayerController : NetworkBehaviour
         CmdSetMousePos(this.MousePosition);
 
         // The logic to place a pawn
-        if (!Mouse.current.rightButton.wasPressedThisFrame) { return; }
         Ray ray = Camera.main.ScreenPointToRay(mousePos);
-        Debug.DrawRay(ray.origin, ray.direction * 50, Color.red);
-        if (!Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, LayerMask.GetMask("Table")))
+
+        // While the user is holding the mouse right button, place a preview (only ont the table)
+        if (Input.GetMouseButton(1))
         {
-            return;
+            if (!Physics.Raycast(ray, out RaycastHit hitPreview, Mathf.Infinity, LayerMask.GetMask("Table")))
+            {
+                return;
+            }
+            helperManager.Highlight(hitPreview.point + Vector3.up * .1f, mousePos);
         }
 
-        PlacePawn(hit.point + Vector3.up * 1.7f);
+        // On release right mouse button
+        if (Input.GetMouseButtonUp(1))
+        {
+            //if (!Mouse.current.rightButton.wasPressedThisFrame) { return; }
+            //Ray ray = Camera.main.ScreenPointToRay(mousePos);
+            Debug.DrawRay(ray.origin, ray.direction * 50, Color.red);
+            if (!Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, LayerMask.GetMask("Table")))
+            {
+                return;
+            }
+            PlacePawn(hit.point + Vector3.up * 1.7f);
+        }
     }
 
     /// <summary>
@@ -190,7 +207,7 @@ public class PlayerController : NetworkBehaviour
     [ClientRpc]
     private void RpcOnPlacingPawnSound(GameObject pawnObj)
     {
-        soundManager.OnPlacingPawn(pawnObj);    
+        soundManager.OnPlacingPawn(pawnObj);
     }
 
 }

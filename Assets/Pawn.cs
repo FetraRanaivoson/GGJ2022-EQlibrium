@@ -47,7 +47,6 @@ public class Pawn : NetworkBehaviour
     {
         if (!gameObject.CompareTag("Pawn"))
         {
-            Debug.Log(gameObject.name);
             SrvOnColllisionEnter();
         }
     }
