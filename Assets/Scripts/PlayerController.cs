@@ -11,6 +11,7 @@ public class PlayerController : NetworkBehaviour
     CinemachineFreeLook cameraFreeLook;
     PlayerUI playerUI;
     SharedUI sharedUI;
+    SoundManager soundManager;
 
     public GameObject pawnPrefab;
 
@@ -32,6 +33,7 @@ public class PlayerController : NetworkBehaviour
     {
         cameraFreeLook = FindObjectOfType<CinemachineFreeLook>();
         sharedUI = FindObjectOfType<SharedUI>();
+        soundManager = FindObjectOfType<SoundManager>();
     }
 
 
@@ -130,7 +132,7 @@ public class PlayerController : NetworkBehaviour
 
         CmdSetMousePos(this.MousePosition);
 
-
+        // The logic to place a pawn
         if (!Mouse.current.rightButton.wasPressedThisFrame) { return; }
         Ray ray = Camera.main.ScreenPointToRay(mousePos);
         Debug.DrawRay(ray.origin, ray.direction * 50, Color.red);
@@ -139,20 +141,30 @@ public class PlayerController : NetworkBehaviour
             return;
         }
 
-        PlacePawn(hit.point + Vector3.up * .35f);
+        PlacePawn(hit.point + Vector3.up * 1.7f);
     }
 
+    /// <summary>
+    /// The function to be called when placing a pawn
+    /// </summary>
     private void PlacePawn(Vector3 hitPoint)
     {
         CmdPlacePawn(hitPoint);
     }
 
+    /// <summary>
+    /// The command requested on the server in order to place a pawn
+    /// </summary>
+    /// <param name="hitPoint"></param>
     [Command]
     private void CmdPlacePawn(Vector3 hitPoint)
     {
         SrvPlacePawn(hitPoint);
     }
 
+    /// <summary>
+    /// The server response to place a pawn: instantiating and spawning then alert all clients 
+    /// </summary>
     [Server]
     public void SrvPlacePawn(Vector3 hitPoint)
     {
@@ -160,11 +172,25 @@ public class PlayerController : NetworkBehaviour
         GameObject pawnObj = Instantiate(pawnPrefab, hitPoint, Quaternion.identity);
         NetworkServer.Spawn(pawnObj);
         RpcToggleGravity(pawnObj, true);
+        RpcOnPlacingPawnSound(pawnObj);
     }
 
+    /// <summary>
+    /// The gravity configuration to be made for the spawned object to all clients
+    /// </summary>
     [ClientRpc]
     public void RpcToggleGravity(GameObject pawnObj, bool state)
     {
-        pawnObj.GetComponent<Pawn>().UseGravity(true);
+        pawnObj.GetComponent<Pawn>().UseGravity(state);
     }
+
+    /// <summary>
+    /// The alert sound to be sent to all clients when a pawn is placed
+    /// </summary>
+    [ClientRpc]
+    private void RpcOnPlacingPawnSound(GameObject pawnObj)
+    {
+        soundManager.OnPlacingPawn(pawnObj);    
+    }
+
 }

@@ -1,14 +1,20 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Pawn : MonoBehaviour
+using Mirror;
+
+public class Pawn : NetworkBehaviour
 {
     Rigidbody rb;
+    AudioSource audioSource;
+    public AudioClip[] placedClip;
 
     private void Awake()
     {
-        rb = GetComponentInChildren<Rigidbody>();
+        rb = GetComponent<Rigidbody>();
+        audioSource = GetComponent<AudioSource>();
     }
 
     /// <summary>
@@ -19,4 +25,49 @@ public class Pawn : MonoBehaviour
         rb.useGravity = state;
     }
 
+    /// <summary>
+    /// The method to be called when this pawn is placed on the table
+    /// </summary>
+    public void OnPlacedSound()
+    {
+        audioSource.clip = placedClip[0];
+        audioSource.Play();
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        CmdOnCollisionEnter(collision.gameObject);
+    }
+
+    /// <summary>
+    /// The command that request the server to play collision sounds
+    /// </summary>
+    [Command(requiresAuthority = false)]
+    public void CmdOnCollisionEnter(GameObject gameObject)
+    {
+        if (!gameObject.CompareTag("Pawn"))
+        {
+            Debug.Log(gameObject.name);
+            SrvOnColllisionEnter();
+        }
+    }
+
+    /// <summary>
+    /// The server response to play collision sounds
+    /// </summary>
+    [Server]
+    private void SrvOnColllisionEnter()
+    {
+        ClientOnCollisionEnter();
+    }
+
+    /// <summary>
+    /// The function that let play collision sound of this object to all clients
+    /// </summary>
+    [ClientRpc]
+    private void ClientOnCollisionEnter()
+    {
+        audioSource.clip = placedClip[UnityEngine.Random.Range(0, placedClip.Length - 1)];
+        audioSource.Play();
+    }
 }

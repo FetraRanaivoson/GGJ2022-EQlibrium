@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 6858220578872663719}
   - component: {fileID: 8151596401523366077}
   - component: {fileID: 5540838958827348784}
+  - component: {fileID: 5519024437898531134}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -67,7 +68,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  pawnPrefab: {fileID: 939550387104453270, guid: 86a6ee2821b186344b6bff1c8272ba03, type: 3}
+  pawnPrefab: {fileID: 1235816652754715280, guid: 5f872e350eed5d44eb901ee7a86d159b, type: 3}
   displayName: No name
   mousePos: {x: 0, y: 0, z: 0}
 --- !u!114 &7074766620655772361
@@ -215,3 +216,17 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!136 &5519024437898531134
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8957728526092423325}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 0.5
+  m_Height: 1
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
