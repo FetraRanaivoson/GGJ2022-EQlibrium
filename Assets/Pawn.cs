@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.UI;
 using Mirror;
 
 public class Pawn : NetworkBehaviour
@@ -10,6 +10,8 @@ public class Pawn : NetworkBehaviour
     Rigidbody rb;
     AudioSource audioSource;
     public AudioClip[] placedClip;
+
+    public Sprite sprite;
 
     private void Awake()
     {
@@ -39,6 +41,15 @@ public class Pawn : NetworkBehaviour
         if (!NetworkClient.ready)
             return;
         CmdOnCollisionEnter(collision.gameObject);
+    }
+
+    /// <summary>
+    /// The method to get the sprite of this pawn
+    /// </summary>
+    /// <returns></returns>
+    public Sprite GetDisplayImage()
+    {
+        return sprite;
     }
 
     /// <summary>

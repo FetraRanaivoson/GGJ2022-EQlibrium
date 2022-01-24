@@ -6,31 +6,40 @@ using System;
 
 public class LevelManager : NetworkBehaviour
 {
+    /// <summary>
+    /// The list of pawn to be used by the level manager
+    /// </summary>
     [SerializeField] public List<GameObject> pawnInventory;
 
-    [SerializeField] public readonly SyncList<bool> randomizePawn = new SyncList<bool>() { true };
-    
-    [Server]
-    public void SrvRandomizePawn(bool state)
-    {
-        randomizePawn[0] = true;
-    }
-
+    /// <summary>
+    /// The last pawn spawned spawned by the server used by the concerned player
+    /// </summary>
     public GameObject lastPawn;
-    public GameObject GetNextObject()
+
+    /// <summary>
+    /// The next pawn to be spawned by the server to be used by the concerned player
+    /// </summary>
+    public GameObject nextPawn;
+
+    /// <summary>
+    /// The function to set the next randomized pawn
+    /// </summary>
+    public void SetNextPawn()
     {
-        if(!randomizePawn[0])
-        {
-            return lastPawn;
-        }
         GameObject nextObject = GetRandomPawn();
+        nextPawn = nextObject;
         lastPawn = nextObject;
-        return nextObject;
     }
 
+    /// <summary>
+    /// The function that select randomized pawn from inventory
+    /// </summary>
+    /// <returns></returns>
     private GameObject GetRandomPawn()
     {
         int randomIndex = UnityEngine.Random.Range(0, pawnInventory.Count);
         return pawnInventory[randomIndex];
     }
+
+ 
 }

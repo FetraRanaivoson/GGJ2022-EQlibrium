@@ -8,6 +8,7 @@ public class GameNetworkManager : NetworkManager
 {
     [SerializeField] List<PlayerController> players = new List<PlayerController>();
     LevelManager levelManager;
+    UIManager UIManager;
 
     public override void OnServerAddPlayer(NetworkConnection conn)
     {
@@ -35,43 +36,54 @@ public class GameNetworkManager : NetworkManager
             players[0].OnNotWaitingForOpponent();
         }
         levelManager = FindObjectOfType<LevelManager>();
+        UIManager = FindObjectOfType<UIManager>();
     }
 
     public override void OnServerChangeScene(string newSceneName)
     {
     }
 
-
+    /// <summary>
+    /// 0 means player 1, 1 means player 2
+    /// </summary>
     int nextTurn = 0;
+
     /// <summary>
     /// Randomize once until the current player ends its turn
     /// </summary>
-    bool shouldRandomizePawn = true;
+    bool shouldRandomizeNextPawn = true;
 
     private void Update()
     {
-
         for (int i = 0; i < players.Count; i++)
         {
             if (players[i] != null && NetworkServer.active)
                 players[i].SetOpponents(players);
         }
 
-        if (shouldRandomizePawn)
+        if (shouldRandomizeNextPawn)
         {
             if (levelManager != null)
             {
-                levelManager.SrvRandomizePawn(true);
-                shouldRandomizePawn = false;
+                levelManager.SetNextPawn();
+                shouldRandomizeNextPawn = false;
             }
         }
+
+
+        // Display next pawn
+        if (UIManager != null && levelManager != null)
+        {
+            UIManager.DisplayNextPawn(levelManager.nextPawn);
+        }
+
 
         //  Setting turn
         if (players.Count > 0)
         {
             if (players[nextTurn] != null)
             {
-                players[nextTurn].CmdSetTurn(true);
+                players[nextTurn].SrvSetTurn(true);
             }
         }
 
@@ -80,11 +92,12 @@ public class GameNetworkManager : NetworkManager
         {
             if (players[nextTurn].placedPawn[0])
             {
-                players[nextTurn].CmdSetTurn(false);
+                players[nextTurn].SrvSetTurn(false);
                 if (nextTurn == 0)
                     nextTurn++;
                 else
                     nextTurn--;
+                shouldRandomizeNextPawn = true;
             }
         }
 

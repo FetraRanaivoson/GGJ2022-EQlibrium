@@ -2,15 +2,17 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using Mirror;
 
-public class SharedUI : MonoBehaviour
+public class UIManager : NetworkBehaviour
 {
     public GameObject loadingScreen;
-
+    public Image nextPawnImage;
 
     void Start()
     {
-        
+
     }
 
 
@@ -36,5 +38,24 @@ public class SharedUI : MonoBehaviour
     public void OnNotLoadingScreen()
     {
         loadingScreen.SetActive(false);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public void DisplayNextPawn(GameObject nextPawn)
+    {
+        nextPawnImage.sprite = nextPawn.GetComponent<Pawn>().GetDisplayImage();
+        spriteSynced = nextPawn.GetComponent<Pawn>().GetDisplayImage();
+    }
+
+    private Sprite spriteSynced;
+    private void Update()
+    {
+        if (!hasAuthority)
+        {
+            nextPawnImage.sprite = spriteSynced;
+            return;
+        }
     }
 }

@@ -10,7 +10,7 @@ public class PlayerController : NetworkBehaviour
 {
     CinemachineFreeLook cameraFreeLook;
     PlayerUI playerUI;
-    SharedUI sharedUI;
+    UIManager sharedUI;
     SoundManager soundManager;
     HelperManager helperManager;
     LevelManager levelManager;
@@ -35,7 +35,7 @@ public class PlayerController : NetworkBehaviour
     private void Awake()
     {
         cameraFreeLook = FindObjectOfType<CinemachineFreeLook>();
-        sharedUI = FindObjectOfType<SharedUI>();
+        sharedUI = FindObjectOfType<UIManager>();
         soundManager = FindObjectOfType<SoundManager>();
         helperManager = FindObjectOfType<HelperManager>();
         levelManager = FindObjectOfType<LevelManager>();
@@ -175,7 +175,7 @@ public class PlayerController : NetworkBehaviour
     /// 
     /// </summary>
     [Server]
-    public void CmdSetTurn(bool state)
+    public void SrvSetTurn(bool state)
     {
         hasTurn[0] = state;
     }
@@ -214,6 +214,7 @@ public class PlayerController : NetworkBehaviour
         }
 
         CmdSetMousePos(this.MousePosition);
+
 
 
         // If this player has not turn
@@ -285,7 +286,7 @@ public class PlayerController : NetworkBehaviour
     {
         //TO DO RANDOMIZE THIS
         //GameObject pawnObj = Instantiate(pawnCylinderPrefab, hitPoint, Quaternion.identity);
-        GameObject pawnObj = Instantiate(levelManager.GetNextObject(), hitPoint, Quaternion.identity);
+        GameObject pawnObj = Instantiate(levelManager.nextPawn, hitPoint, Quaternion.identity);
         NetworkServer.Spawn(pawnObj);
         RpcToggleGravity(pawnObj, true);
         RpcOnPlacingPawnSound(pawnObj);
