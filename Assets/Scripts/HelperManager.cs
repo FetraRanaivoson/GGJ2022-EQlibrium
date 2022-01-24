@@ -36,7 +36,7 @@ public class HelperManager : NetworkBehaviour
     [Command(requiresAuthority = false)]
     public void CmdDeleteHelper()
     {
-        if (!NetworkClient.ready)
+        //if (!NetworkClient.ready)
             SrvDeleteHelper(helpers[helpers.Count - 1]);
     }
 

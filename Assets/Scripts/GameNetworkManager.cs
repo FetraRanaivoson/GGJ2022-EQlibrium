@@ -6,7 +6,7 @@ using Mirror;
 
 public class GameNetworkManager : NetworkManager
 {
-    [SerializeField] List<PlayerController> players;
+    [SerializeField] List<PlayerController> players = new List<PlayerController>();
     LevelManager levelManager;
 
     public override void OnServerAddPlayer(NetworkConnection conn)
@@ -43,10 +43,20 @@ public class GameNetworkManager : NetworkManager
 
 
     int nextTurn = 0;
+    /// <summary>
+    /// Randomize once until the current player ends its turn
+    /// </summary>
     bool shouldRandomizePawn = true;
 
     private void Update()
     {
+
+        for (int i = 0; i < players.Count; i++)
+        {
+            if (players[i] != null && NetworkServer.active)
+                players[i].SetOpponents(players);
+        }
+
         if (shouldRandomizePawn)
         {
             if (levelManager != null)
@@ -56,11 +66,25 @@ public class GameNetworkManager : NetworkManager
             }
         }
 
+        //  Setting turn
         if (players.Count > 0)
         {
             if (players[nextTurn] != null)
             {
                 players[nextTurn].CmdSetTurn(true);
+            }
+        }
+
+        // Change turn handler
+        if (players.Count > 1)
+        {
+            if (players[nextTurn].placedPawn[0])
+            {
+                players[nextTurn].CmdSetTurn(false);
+                if (nextTurn == 0)
+                    nextTurn++;
+                else
+                    nextTurn--;
             }
         }
 

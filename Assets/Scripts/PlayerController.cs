@@ -61,6 +61,43 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
+    /// <summary>The synced variable that list all 
+    /// existing players in the world
+    /// </summary>
+    [SyncVar]
+    [SerializeField]
+    private List<PlayerController> Allplayers = new List<PlayerController>();
+
+    /// <summary>The server method that gives to ALL players 
+    /// the list of all available players in the world 
+    /// including this player</summary>
+    [Server]
+    public void SetOpponents(List<PlayerController> playerControllers)
+    {
+        Allplayers = playerControllers;
+    }
+
+    /// <summary> Method to check if there is at least 2 players are 
+    /// present in the world
+    /// </summary>
+    private bool allPlayersReady => Allplayers.Count > 1 && Allplayers[1] != null;
+
+    /// <summary> 
+    /// This player method to get his opponent 
+    /// </summary>
+    public PlayerController GetOpponent()
+    {
+        if (allPlayersReady)
+        {
+            return isServer ? Allplayers[1] : Allplayers[0]; //0:server 1:client
+        }
+        else
+        {
+            return this; //Compiler Happy 
+        }
+    }
+
+
     /// <summary>
     /// The event that happen when the game is unpaused
     /// </summary>
@@ -113,7 +150,6 @@ public class PlayerController : NetworkBehaviour
     /// The method to be called by this player to synchronize his mouse position
     /// value across the network
     /// </summary>
-    /// <param name="mousePos"></param>
     [Command(requiresAuthority = false)]
     public void CmdSetMousePos(Vector3 mousePos)
     {
@@ -144,6 +180,20 @@ public class PlayerController : NetworkBehaviour
         hasTurn[0] = state;
     }
 
+    /// <summary>
+    /// The way the server check if this player has placed a pawn
+    /// </summary>
+    [SerializeField] public readonly SyncList<bool> placedPawn = new SyncList<bool> { false };
+
+    /// <summary>
+    /// The command to be call by the player to tell the server he has placed a pawn
+    /// </summary>
+    [Command(requiresAuthority =false)]
+    public void CmdPlacedPawn(bool state)
+    {
+        placedPawn[0] = state;
+    }
+
 
     [ClientCallback]
     void Update()
@@ -166,10 +216,10 @@ public class PlayerController : NetworkBehaviour
         CmdSetMousePos(this.MousePosition);
 
 
-
         // If this player has not turn
         if (!hasTurn[0])
         {
+            CmdPlacedPawn(false);
             return;
         }
 
@@ -202,6 +252,7 @@ public class PlayerController : NetworkBehaviour
                 return;
             }
             PlacePawn(hit.point + Vector3.up * 1.2f);
+            CmdPlacedPawn(true);
         }
     }
 
@@ -216,7 +267,6 @@ public class PlayerController : NetworkBehaviour
     /// <summary>
     /// The command requested on the server in order to place a pawn
     /// </summary>
-    /// <param name="hitPoint"></param>
     [Command]
     private void CmdPlacePawn( Vector3 hitPoint)
     {
