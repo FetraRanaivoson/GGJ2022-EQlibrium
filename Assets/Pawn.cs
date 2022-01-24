@@ -28,7 +28,15 @@ public class Pawn : NetworkBehaviour
     }
 
     /// <summary>
-    /// The method to be called when this pawn is placed on the table
+    /// The method that makes this object dynamic or kinematic
+    /// </summary>
+    public void IsKinematic(bool state)
+    {
+        rb.isKinematic = state;
+    }
+
+    /// <summary>
+    /// The method to be called play the sound od this object
     /// </summary>
     public void OnPlacedSound()
     {
@@ -38,8 +46,6 @@ public class Pawn : NetworkBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (!NetworkClient.ready)
-            return;
         CmdOnCollisionEnter(collision.gameObject);
     }
 
@@ -58,9 +64,6 @@ public class Pawn : NetworkBehaviour
     [Command(requiresAuthority = false)]
     public void CmdOnCollisionEnter(GameObject gameObject)
     {
-        if (!NetworkClient.ready)
-            return;
-
         if (!gameObject.CompareTag("Pawn"))
         {
             SrvOnColllisionEnter();

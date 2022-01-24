@@ -5,16 +5,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using Mirror;
 
-public class UIManager : NetworkBehaviour
+public class UIManager : MonoBehaviour
 {
     public GameObject loadingScreen;
     public Image nextPawnImage;
-
-    void Start()
-    {
-
-    }
-
 
     /// <summary>
     /// The event that happen on the shared UI when the game is unpaused
@@ -41,21 +35,12 @@ public class UIManager : NetworkBehaviour
     }
 
     /// <summary>
-    /// 
+    /// The method to get any pawn object be displayed on the UI
     /// </summary>
-    public void DisplayNextPawn(GameObject nextPawn)
+    public void DisplayNextPawn(GameObject gameObject)
     {
-        nextPawnImage.sprite = nextPawn.GetComponent<Pawn>().GetDisplayImage();
-        spriteSynced = nextPawn.GetComponent<Pawn>().GetDisplayImage();
+        //Debug.Log(obj);
+        nextPawnImage.sprite = gameObject.GetComponent<Pawn>().GetDisplayImage();
     }
 
-    private Sprite spriteSynced;
-    private void Update()
-    {
-        if (!hasAuthority)
-        {
-            nextPawnImage.sprite = spriteSynced;
-            return;
-        }
-    }
 }

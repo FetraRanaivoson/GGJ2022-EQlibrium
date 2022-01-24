@@ -10,7 +10,7 @@ public class PlayerController : NetworkBehaviour
 {
     CinemachineFreeLook cameraFreeLook;
     PlayerUI playerUI;
-    UIManager sharedUI;
+    public UIManager uiManager;
     SoundManager soundManager;
     HelperManager helperManager;
     LevelManager levelManager;
@@ -35,7 +35,7 @@ public class PlayerController : NetworkBehaviour
     private void Awake()
     {
         cameraFreeLook = FindObjectOfType<CinemachineFreeLook>();
-        sharedUI = FindObjectOfType<UIManager>();
+        uiManager = FindObjectOfType<UIManager>();
         soundManager = FindObjectOfType<SoundManager>();
         helperManager = FindObjectOfType<HelperManager>();
         levelManager = FindObjectOfType<LevelManager>();
@@ -44,6 +44,7 @@ public class PlayerController : NetworkBehaviour
 
     void Start()
     {
+
         PickCamera();
     }
 
@@ -121,7 +122,7 @@ public class PlayerController : NetworkBehaviour
     /// </summary>
     public void OnWaitingForOpponent()
     {
-        sharedUI.OnLoadingScreen();
+        uiManager.OnLoadingScreen();
     }
 
     /// <summary>
@@ -129,7 +130,7 @@ public class PlayerController : NetworkBehaviour
     /// </summary>
     public void OnNotWaitingForOpponent()
     {
-        sharedUI.OnNotLoadingScreen();
+        uiManager.OnNotLoadingScreen();
     }
 
     /// <summary>
@@ -167,12 +168,12 @@ public class PlayerController : NetworkBehaviour
     private bool canPlace = false;
 
     /// <summary>
-    /// 
+    /// The synced variable that helps to know if this player has turn
     /// </summary>
     [SerializeField] public readonly SyncList<bool> hasTurn = new SyncList<bool> { false };
 
     /// <summary>
-    /// 
+    /// The way the server set the turn for a player
     /// </summary>
     [Server]
     public void SrvSetTurn(bool state)
@@ -188,7 +189,7 @@ public class PlayerController : NetworkBehaviour
     /// <summary>
     /// The command to be call by the player to tell the server he has placed a pawn
     /// </summary>
-    [Command(requiresAuthority =false)]
+    [Command(requiresAuthority = false)]
     public void CmdPlacedPawn(bool state)
     {
         placedPawn[0] = state;
@@ -252,9 +253,29 @@ public class PlayerController : NetworkBehaviour
             {
                 return;
             }
+            //PlacePawn(hit.point + Vector3.up * 1.2f);
             PlacePawn(hit.point + Vector3.up * 1.2f);
             CmdPlacedPawn(true);
+            CmdIncrementtNextPawnIndex();
         }
+    }
+    /// <summary>
+    /// The command to be called by this player after placing a pawn to increment the next pawn index.
+    /// That index is crucial because we need to know what to "really" spawn on the table next among our 
+    /// lists of pawn "pawnInstances". And we always need the last one, that's we always need to increment the index.
+    /// </summary>
+    [Command]
+    public void CmdIncrementtNextPawnIndex()
+    {
+        RpcIncrementtNextPawnIndex();
+    }
+    /// <summary>
+    /// The command sent to all clients to increment the next pawn index
+    /// </summary>
+    [ClientRpc]
+    private void RpcIncrementtNextPawnIndex()
+    {
+        levelManager.nextPawnIndex++;
     }
 
     /// <summary>
@@ -262,19 +283,15 @@ public class PlayerController : NetworkBehaviour
     /// </summary>
     private void PlacePawn(Vector3 hitPoint)
     {
-        CmdPlacePawn( hitPoint);
+        CmdPlacePawn(hitPoint);
     }
 
     /// <summary>
     /// The command requested on the server in order to place a pawn
     /// </summary>
-    [Command]
-    private void CmdPlacePawn( Vector3 hitPoint)
+    [Command(requiresAuthority = false)]
+    private void CmdPlacePawn(Vector3 hitPoint)
     {
-        if (!NetworkClient.ready)
-        {
-            return;
-        }
         SrvPlacePawn(hitPoint);
     }
 
@@ -284,14 +301,18 @@ public class PlayerController : NetworkBehaviour
     [Server]
     public void SrvPlacePawn(Vector3 hitPoint)
     {
-        //TO DO RANDOMIZE THIS
         //GameObject pawnObj = Instantiate(pawnCylinderPrefab, hitPoint, Quaternion.identity);
-        GameObject pawnObj = Instantiate(levelManager.nextPawn, hitPoint, Quaternion.identity);
-        NetworkServer.Spawn(pawnObj);
-        RpcToggleGravity(pawnObj, true);
-        RpcOnPlacingPawnSound(pawnObj);
+        //GameObject pawnObj = Instantiate(levelManager.nextPawn[0], hitPoint, Quaternion.identity);
+        //GameObject pawnObj = Instantiate(gos[0], hitPoint, Quaternion.identity);
+        pawnInstances[levelManager.nextPawnIndex].transform.position = hitPoint;
+        //NetworkServer.Spawn(pawnObj);
+        //RpcToggleGravity(pawnObj, true);
+        RpcIsKinematic(pawnInstances[levelManager.nextPawnIndex], false);
+        RpcToggleGravity(pawnInstances[levelManager.nextPawnIndex], true);
+        RpcOnPlacingPawnSound(pawnInstances[levelManager.nextPawnIndex]);
     }
 
+   
     /// <summary>
     /// The gravity configuration to be made for the spawned object to all clients
     /// </summary>
@@ -299,6 +320,14 @@ public class PlayerController : NetworkBehaviour
     public void RpcToggleGravity(GameObject pawnObj, bool state)
     {
         pawnObj.GetComponent<Pawn>().UseGravity(state);
+    }
+    /// <summary>
+    /// The dynamic configuration to be made for the spawned object to all clients
+    /// </summary>
+    [ClientRpc]
+    public void RpcIsKinematic(GameObject pawnObj, bool state)
+    {
+        pawnObj.GetComponent<Pawn>().IsKinematic(state);
     }
 
     /// <summary>
@@ -309,5 +338,61 @@ public class PlayerController : NetworkBehaviour
     {
         soundManager.OnPlacingPawn(pawnObj);
     }
+
+    /// <summary>
+    /// The function to be called by the network manager to display next pawn 
+    /// </summary>
+    public void DisplayNextPawn(GameObject nextPawn)
+    {
+        //uiManager.DisplayNextPawn(gameObject);
+       SrvDisplayNextPawn(nextPawn);
+        
+    }
+
+    /// <summary>
+    /// The handler run by the server to instantiate the next pawn.
+    /// WITHOUT INSTANTIATING THE NEXT PAWN, THERE'S NO WAY TO GET HIS COMPONENT PAWN ON CLIENTS
+    /// WE WILL NEED THE COMPONENT PAWN TO GET THE DISPLAY IMAGE OF THE PAWN
+    /// WHOSE VALUE IS THEN APPLIED TO THE NEXT PAWN DISPLAY IMAGE OF THE UI MANAGER
+    /// </summary>
+    [Server]
+    private void SrvDisplayNextPawn(GameObject nextPawn)
+    {
+        GameObject pawnInstance = Instantiate(nextPawn, Vector3.up * 1500, Quaternion.identity);
+        NetworkServer.Spawn(pawnInstance);
+        pawnInstances.Add(pawnInstance);
+
+        CmdDisplayNextPawn(pawnInstance);
+    }
+
+    /// <summary>
+    /// The list of every spawned pawns from the very beginning.
+    /// </summary>
+    [SerializeField] public readonly SyncList<GameObject> pawnInstances = new SyncList<GameObject>() {};
+    
+
+    /// <summary>
+    /// The command run by this player for all cients when the pawn is spawned: kinematic set, gravity set, ui display set.
+    /// </summary>
+    [Command(requiresAuthority =false)]
+    private void CmdDisplayNextPawn(GameObject inst)
+    {
+        RpcIsKinematic(inst, true);
+        RpcToggleGravity(inst, false);
+        RpcDisplayNextPawn(inst);
+    }
+
+
+    /// <summary>
+    /// The function that tells the manager to display the next pawn on the ui for all clients
+    /// Without the paramater GameObject to be an INSTANCE, this would be impossible.
+    /// Prefab doesn't work
+    /// </summary>
+    [ClientRpc]
+    private void RpcDisplayNextPawn(GameObject inst)
+    {
+        uiManager.DisplayNextPawn(inst);
+    }
+
 
 }

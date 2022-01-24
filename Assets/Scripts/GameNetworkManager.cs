@@ -28,6 +28,9 @@ public class GameNetworkManager : NetworkManager
         {
             players[0].OnWaitingForOpponent();
             players[0].OnPauseGame();
+
+            levelManager = FindObjectOfType<LevelManager>();
+            UIManager = FindObjectOfType<UIManager>();
         }
         // In case 2 players exist
         if (NetworkServer.active && players.Count > 1)
@@ -35,8 +38,7 @@ public class GameNetworkManager : NetworkManager
             players[0].OnUnPauseGame();
             players[0].OnNotWaitingForOpponent();
         }
-        levelManager = FindObjectOfType<LevelManager>();
-        UIManager = FindObjectOfType<UIManager>();
+
     }
 
     public override void OnServerChangeScene(string newSceneName)
@@ -55,63 +57,50 @@ public class GameNetworkManager : NetworkManager
 
     private void Update()
     {
-        for (int i = 0; i < players.Count; i++)
+        if (NetworkServer.active && players.Count > 1)
         {
-            if (players[i] != null && NetworkServer.active)
-                players[i].SetOpponents(players);
-        }
-
-        if (shouldRandomizeNextPawn)
-        {
-            if (levelManager != null)
+            for (int i = 0; i < players.Count; i++)
             {
-                levelManager.SetNextPawn();
-                shouldRandomizeNextPawn = false;
+                if (players[i] != null && NetworkServer.active)
+                    players[i].SetOpponents(players);
+            }
+
+            if (shouldRandomizeNextPawn && players.Count == 2)
+            {
+                if (levelManager != null)
+                {
+                    levelManager.SetNextPawn();
+                    shouldRandomizeNextPawn = false;
+                }
+                for (int i = 0; i < players.Count; i++)
+                {
+                    players[i].DisplayNextPawn(levelManager.nextPawn[0]);
+                }
+            }
+
+            //  Setting turn
+            if (players.Count > 0)
+            {
+                if (players[nextTurn] != null)
+                {
+                    players[nextTurn].SrvSetTurn(true);
+                }
+            }
+
+            // Change turn handler
+            if (players.Count == 2)
+            {
+                if (players[nextTurn].placedPawn[0])
+                {
+                    players[nextTurn].SrvSetTurn(false);
+                    if (nextTurn == 0)
+                        nextTurn++;
+                    else
+                        nextTurn--;
+                    shouldRandomizeNextPawn = true;
+                }
             }
         }
-
-
-        // Display next pawn
-        if (UIManager != null && levelManager != null)
-        {
-            UIManager.DisplayNextPawn(levelManager.nextPawn);
-        }
-
-
-        //  Setting turn
-        if (players.Count > 0)
-        {
-            if (players[nextTurn] != null)
-            {
-                players[nextTurn].SrvSetTurn(true);
-            }
-        }
-
-        // Change turn handler
-        if (players.Count > 1)
-        {
-            if (players[nextTurn].placedPawn[0])
-            {
-                players[nextTurn].SrvSetTurn(false);
-                if (nextTurn == 0)
-                    nextTurn++;
-                else
-                    nextTurn--;
-                shouldRandomizeNextPawn = true;
-            }
-        }
-
-
-
-
-
-        //for (int i = 0; i < players.Count; i++)
-        //{
-        //    if (players[i].IsThinking)
-        //    {
-        //        levelManager.RandomizePawn = false;
-        //    }
-        //}
-
     }
+
 }
