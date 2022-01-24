@@ -68,7 +68,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  pawnPrefab: {fileID: 1235816652754715280, guid: 5f872e350eed5d44eb901ee7a86d159b, type: 3}
+  pawnCylinderPrefab: {fileID: 1235816652754715280, guid: 5f872e350eed5d44eb901ee7a86d159b, type: 3}
+  pawnCubePrefab: {fileID: 804300092581168002, guid: 66a62daa3c0650c4eb285b07e0a8e156, type: 3}
   displayName: No name
   mousePos: {x: 0, y: 0, z: 0}
 --- !u!114 &7074766620655772361

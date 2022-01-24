@@ -6,7 +6,8 @@ using Mirror;
 
 public class GameNetworkManager : NetworkManager
 {
-    [SerializeField]List<PlayerController> players;
+    [SerializeField] List<PlayerController> players;
+    LevelManager levelManager;
 
     public override void OnServerAddPlayer(NetworkConnection conn)
     {
@@ -21,7 +22,7 @@ public class GameNetworkManager : NetworkManager
         //Add to list
         players.Add(player);
 
-        // In case 1 player exists
+        //In case 1 player exists
         if (NetworkServer.active && players.Count == 1)
         {
             players[0].OnWaitingForOpponent();
@@ -33,30 +34,47 @@ public class GameNetworkManager : NetworkManager
             players[0].OnUnPauseGame();
             players[0].OnNotWaitingForOpponent();
         }
-
+        levelManager = FindObjectOfType<LevelManager>();
     }
+
+    public override void OnServerChangeScene(string newSceneName)
+    {
+    }
+
+
+    int nextTurn = 0;
+    bool shouldRandomizePawn = true;
 
     private void Update()
     {
-        //  On the shared UI, display the next object to be placed
-        
-        //  If player 1 or 2 is turn:
-        //  Get its mouse position on screen
+        if (shouldRandomizePawn)
+        {
+            if (levelManager != null)
+            {
+                levelManager.SrvRandomizePawn(true);
+                shouldRandomizePawn = false;
+            }
+        }
 
-        //  Spawn the next object to be placed where the mouse position of that player is
-    
-        // Update in Player Controller:
-            // Screen point to ray: on click and if it is a table, place the base of the object
-            // at the clicked position in 3d view
-            // SYNC pawn position over the network
-        
-        //Wait to settle
-        
-        //If the table collides underneath, then the current player loses. 
+        if (players.Count > 0)
+        {
+            if (players[nextTurn] != null)
+            {
+                players[nextTurn].CmdSetTurn(true);
+            }
+        }
 
-            //Display win / lose popup and let be a restart or quit button
 
-        //Else, switch player
+
+
+
+        //for (int i = 0; i < players.Count; i++)
+        //{
+        //    if (players[i].IsThinking)
+        //    {
+        //        levelManager.RandomizePawn = false;
+        //    }
+        //}
 
     }
 }

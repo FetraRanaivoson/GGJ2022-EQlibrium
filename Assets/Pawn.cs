@@ -36,6 +36,8 @@ public class Pawn : NetworkBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
+        if (!NetworkClient.ready)
+            return;
         CmdOnCollisionEnter(collision.gameObject);
     }
 
@@ -45,6 +47,9 @@ public class Pawn : NetworkBehaviour
     [Command(requiresAuthority = false)]
     public void CmdOnCollisionEnter(GameObject gameObject)
     {
+        if (!NetworkClient.ready)
+            return;
+
         if (!gameObject.CompareTag("Pawn"))
         {
             SrvOnColllisionEnter();
@@ -66,7 +71,7 @@ public class Pawn : NetworkBehaviour
     [ClientRpc]
     private void ClientOnCollisionEnter()
     {
-        audioSource.clip = placedClip[UnityEngine.Random.Range(0, placedClip.Length - 1)];
+        audioSource.clip = placedClip[UnityEngine.Random.Range(0, placedClip.Length)];
         audioSource.Play();
     }
 }

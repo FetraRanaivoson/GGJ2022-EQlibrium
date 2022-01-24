@@ -13,8 +13,10 @@ public class PlayerController : NetworkBehaviour
     SharedUI sharedUI;
     SoundManager soundManager;
     HelperManager helperManager;
+    LevelManager levelManager;
 
-    public GameObject pawnPrefab;
+    public GameObject pawnCylinderPrefab;
+    public GameObject pawnCubePrefab;
 
     /// <summary>
     /// The name that identifies this player on the network
@@ -36,6 +38,7 @@ public class PlayerController : NetworkBehaviour
         sharedUI = FindObjectOfType<SharedUI>();
         soundManager = FindObjectOfType<SoundManager>();
         helperManager = FindObjectOfType<HelperManager>();
+        levelManager = FindObjectOfType<LevelManager>();
     }
 
 
@@ -123,6 +126,24 @@ public class PlayerController : NetworkBehaviour
     /// <returns></returns>
     private Vector3 MousePosition => Mouse.current.position.ReadValue();
 
+    public bool IsThinking { get; internal set; }
+
+    private bool canPlace = false;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SerializeField] public readonly SyncList<bool> hasTurn = new SyncList<bool> { false };
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [Server]
+    public void CmdSetTurn(bool state)
+    {
+        hasTurn[0] = state;
+    }
+
 
     [ClientCallback]
     void Update()
@@ -132,28 +153,45 @@ public class PlayerController : NetworkBehaviour
             return;
         }
 
-        if (!NetworkClient.ready || !NetworkClient.active)
+        if (!NetworkClient.ready)
+        {
+            return;
+        }
+
+        if (!NetworkClient.active)
         {
             return;
         }
 
         CmdSetMousePos(this.MousePosition);
 
+
+
+        // If this player has not turn
+        if (!hasTurn[0])
+        {
+            return;
+        }
+
+
         // The logic to place a pawn
         Ray ray = Camera.main.ScreenPointToRay(mousePos);
+
 
         // While the user is holding the mouse right button, place a preview (only ont the table)
         if (Input.GetMouseButton(1))
         {
             if (!Physics.Raycast(ray, out RaycastHit hitPreview, Mathf.Infinity, LayerMask.GetMask("Table")))
             {
+                canPlace = false;
                 return;
             }
             helperManager.Highlight(hitPreview.point + Vector3.up * .1f, mousePos);
+            canPlace = true;
         }
 
         // On release right mouse button
-        if (Input.GetMouseButtonUp(1))
+        if (Input.GetMouseButtonUp(1) && canPlace)
         {
             helperManager.CmdDeleteHelper();
             //if (!Mouse.current.rightButton.wasPressedThisFrame) { return; }
@@ -163,7 +201,7 @@ public class PlayerController : NetworkBehaviour
             {
                 return;
             }
-            PlacePawn(hit.point + Vector3.up * 1.7f);
+            PlacePawn(hit.point + Vector3.up * 1.2f);
         }
     }
 
@@ -172,7 +210,7 @@ public class PlayerController : NetworkBehaviour
     /// </summary>
     private void PlacePawn(Vector3 hitPoint)
     {
-        CmdPlacePawn(hitPoint);
+        CmdPlacePawn( hitPoint);
     }
 
     /// <summary>
@@ -180,8 +218,12 @@ public class PlayerController : NetworkBehaviour
     /// </summary>
     /// <param name="hitPoint"></param>
     [Command]
-    private void CmdPlacePawn(Vector3 hitPoint)
+    private void CmdPlacePawn( Vector3 hitPoint)
     {
+        if (!NetworkClient.ready)
+        {
+            return;
+        }
         SrvPlacePawn(hitPoint);
     }
 
@@ -192,7 +234,8 @@ public class PlayerController : NetworkBehaviour
     public void SrvPlacePawn(Vector3 hitPoint)
     {
         //TO DO RANDOMIZE THIS
-        GameObject pawnObj = Instantiate(pawnPrefab, hitPoint, Quaternion.identity);
+        //GameObject pawnObj = Instantiate(pawnCylinderPrefab, hitPoint, Quaternion.identity);
+        GameObject pawnObj = Instantiate(levelManager.GetNextObject(), hitPoint, Quaternion.identity);
         NetworkServer.Spawn(pawnObj);
         RpcToggleGravity(pawnObj, true);
         RpcOnPlacingPawnSound(pawnObj);

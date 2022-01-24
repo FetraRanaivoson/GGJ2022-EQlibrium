@@ -33,10 +33,11 @@ public class HelperManager : NetworkBehaviour
     /// <summary>
     /// The command to delete the last helper (basically the only visible) from external code
     /// </summary>
-    [Command(requiresAuthority =false)]
+    [Command(requiresAuthority = false)]
     public void CmdDeleteHelper()
     {
-        SrvDeleteHelper(helpers[helpers.Count-1]);
+        if (!NetworkClient.ready)
+            SrvDeleteHelper(helpers[helpers.Count - 1]);
     }
 
     /// <summary>
