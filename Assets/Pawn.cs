@@ -5,13 +5,18 @@ using UnityEngine;
 using UnityEngine.UI;
 using Mirror;
 
+[RequireComponent(typeof(Collider))]
+[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(NetworkTransform))]
+[RequireComponent(typeof(AudioSource))]
+
 public class Pawn : NetworkBehaviour
 {
     Rigidbody rb;
     AudioSource audioSource;
     public AudioClip[] placedClip;
-
     public Sprite sprite;
+    public Collider c;
 
     private void Awake()
     {
@@ -33,6 +38,14 @@ public class Pawn : NetworkBehaviour
     public void IsKinematic(bool state)
     {
         rb.isKinematic = state;
+    }
+
+    /// <summary>
+    /// The method that makes this object collidable or not
+    /// </summary>
+    public void EnableCollider(bool state)
+    {
+        c.enabled = state;
     }
 
     /// <summary>
@@ -87,5 +100,13 @@ public class Pawn : NetworkBehaviour
     {
         audioSource.clip = placedClip[UnityEngine.Random.Range(0, placedClip.Length)];
         audioSource.Play();
+    }
+
+    /// <summary>
+    /// The torque function for this pawn
+    /// </summary>
+    public void Torque(Vector2 moveDir, float force, float deltaTime)
+    {
+        transform.Rotate(moveDir.y * force, moveDir.x * force, 0);
     }
 }

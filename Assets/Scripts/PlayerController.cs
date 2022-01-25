@@ -9,14 +9,13 @@ using System;
 public class PlayerController : NetworkBehaviour
 {
     CinemachineFreeLook cameraFreeLook;
-    PlayerUI playerUI;
-    public UIManager uiManager;
+    UIManager uiManager;
     SoundManager soundManager;
     HelperManager helperManager;
     LevelManager levelManager;
 
-    public GameObject pawnCylinderPrefab;
-    public GameObject pawnCubePrefab;
+    Vector2 moveDir;
+    public float torqueAmount;
 
     /// <summary>
     /// The name that identifies this player on the network
@@ -58,7 +57,6 @@ public class PlayerController : NetworkBehaviour
         {
             cameraFreeLook.Follow = transform;
             cameraFreeLook.LookAt = transform;
-            playerUI = FindObjectOfType<PlayerUI>();
         }
     }
 
@@ -229,7 +227,6 @@ public class PlayerController : NetworkBehaviour
         // The logic to place a pawn
         Ray ray = Camera.main.ScreenPointToRay(mousePos);
 
-
         // While the user is holding the mouse right button, place a preview (only ont the table)
         if (Input.GetMouseButton(1))
         {
@@ -240,6 +237,12 @@ public class PlayerController : NetworkBehaviour
             }
             helperManager.Highlight(hitPreview.point + Vector3.up * .1f, mousePos);
             canPlace = true;
+
+            //Get the move direction from keyboard and torque the next pawn
+            CmdTorque(moveDir, pawnInstances[levelManager.nextPawnIndex], torqueAmount, Time.deltaTime);
+
+            // Live preview the pawn
+            CmdLivePreviewPawn(hitPreview.point);
         }
 
         // On release right mouse button
@@ -254,7 +257,7 @@ public class PlayerController : NetworkBehaviour
                 return;
             }
             //PlacePawn(hit.point + Vector3.up * 1.2f);
-            PlacePawn(hit.point + Vector3.up * 1.2f);
+            PlacePawn(hit.point + Vector3.up * .95f);
             CmdPlacedPawn(true);
             CmdIncrementtNextPawnIndex();
         }
@@ -307,6 +310,7 @@ public class PlayerController : NetworkBehaviour
         pawnInstances[levelManager.nextPawnIndex].transform.position = hitPoint;
         //NetworkServer.Spawn(pawnObj);
         //RpcToggleGravity(pawnObj, true);
+        RpcEnableCollider(pawnInstances[levelManager.nextPawnIndex], true);
         RpcIsKinematic(pawnInstances[levelManager.nextPawnIndex], false);
         RpcToggleGravity(pawnInstances[levelManager.nextPawnIndex], true);
         RpcOnPlacingPawnSound(pawnInstances[levelManager.nextPawnIndex]);
@@ -329,6 +333,14 @@ public class PlayerController : NetworkBehaviour
     {
         pawnObj.GetComponent<Pawn>().IsKinematic(state);
     }
+    /// <summary>
+    /// The collider configuration to be made for the spawned object to all clients
+    /// </summary>
+    [ClientRpc]
+    public void RpcEnableCollider(GameObject pawnObj, bool state)
+    {
+        pawnObj.GetComponent<Pawn>().EnableCollider(state);
+    }
 
     /// <summary>
     /// The alert sound to be sent to all clients when a pawn is placed
@@ -345,6 +357,7 @@ public class PlayerController : NetworkBehaviour
     public void DisplayNextPawn(GameObject nextPawn)
     {
         //uiManager.DisplayNextPawn(gameObject);
+
        SrvDisplayNextPawn(nextPawn);
         
     }
@@ -372,11 +385,12 @@ public class PlayerController : NetworkBehaviour
     
 
     /// <summary>
-    /// The command run by this player for all cients when the pawn is spawned: kinematic set, gravity set, ui display set.
+    /// The command run by this player for all cients when the pawn is spawned: collider set, kinematic set, gravity set, ui display set.
     /// </summary>
     [Command(requiresAuthority =false)]
     private void CmdDisplayNextPawn(GameObject inst)
     {
+        RpcEnableCollider(inst, false);
         RpcIsKinematic(inst, true);
         RpcToggleGravity(inst, false);
         RpcDisplayNextPawn(inst);
@@ -394,5 +408,48 @@ public class PlayerController : NetworkBehaviour
         uiManager.DisplayNextPawn(inst);
     }
 
+    /// <summary>
+    /// Receive inputs from keyboard WASD
+    /// </summary>
+    public void OnMove(InputAction.CallbackContext context)
+    {
+        moveDir = context.ReadValue<Vector2>();
+    }
+
+    /// <summary>
+    /// The command that let this player to torque a pawn on all instances
+    /// </summary>
+    [Command]
+    public void CmdTorque(Vector2 moveDir, GameObject pawn, float torqueAmount, float deltaTime)
+    {
+        RpcTorque(moveDir, pawn, torqueAmount, deltaTime);
+    }
+
+    /// <summary>
+    /// The handler that tells all clients to torque this pawn
+    /// </summary>
+    [ClientRpc]
+    public void RpcTorque(Vector2 moveDir, GameObject pawn, float torqueAmount, float deltaTime)
+    {
+        pawn.GetComponent<Pawn>().Torque(moveDir, torqueAmount, deltaTime);
+    }
+
+    /// <summary>
+    /// The command run by the server to preview the pawn on all instances
+    /// </summary>
+    [Command]
+    public void CmdLivePreviewPawn(Vector3 hitPreview)
+    {
+        RpcLivePreviewPawn(hitPreview);
+    }
+
+    /// <summary>
+    /// The handler that tells all clients to preview the pawn only all instances
+    /// </summary>
+    [ClientRpc]
+    public void RpcLivePreviewPawn(Vector3 hitPreview)
+    {
+        pawnInstances[levelManager.nextPawnIndex].transform.position = hitPreview + Vector3.up * .95f;
+    }
 
 }

@@ -37,7 +37,7 @@ public class LevelManager : NetworkBehaviour
     {
         GameObject nextObject = GetRandomPawn();
         nextPawn[0] = nextObject;
-        Debug.Log("next pawn is: " + nextPawn[0].name);
+        //Debug.Log("next pawn is: " + nextPawn[0].name);
         lastPawn = nextObject;
     }
 

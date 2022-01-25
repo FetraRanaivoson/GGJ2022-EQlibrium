@@ -31,13 +31,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2781491726093406700}
-  m_LocalRotation: {x: -0.021161757, y: 0.0039795563, z: -0.00027336995, w: 0.9997682}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.75, y: 3.91, z: -1.43}
   m_LocalScale: {x: 12.473113, y: 12.473113, z: 12.473113}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: -2.425, y: 0.457, z: -0.041}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &1908924556744262899
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -97,10 +97,10 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 0.06544329
-  m_Height: 0.14960532
+  m_Radius: 0.066009685
+  m_Height: 0.15243733
   m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0, y: -0.0014160001, z: 0.00056640385}
 --- !u!54 &3051397848084081843
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -113,7 +113,7 @@ Rigidbody:
   m_Drag: 0
   m_AngularDrag: 16
   m_UseGravity: 1
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -183,6 +183,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 814a87e6d70a9be449af7fc09ef50b38, type: 3}
   - {fileID: 8300000, guid: 1520bfeacbb35eb4a8832ffd35e2d73c, type: 3}
   sprite: {fileID: 21300000, guid: b13deb22f3e491f43b6e6e60ecbc6292, type: 3}
+  c: {fileID: 3051397848084081842}
 --- !u!82 &3051397848084081855
 AudioSource:
   m_ObjectHideFlags: 0
@@ -194,7 +195,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
-  m_PlayOnAwake: 1
+  m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
   Loop: 0

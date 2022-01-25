@@ -6,7 +6,6 @@ using Mirror;
 
 public class Helper : NetworkBehaviour
 {
-    bool isCollidingPawn = false;
     public Material material;
     Color initialColor;
     Color initialEmissionColor;

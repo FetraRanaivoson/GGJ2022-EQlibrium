@@ -68,9 +68,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  pawnCylinderPrefab: {fileID: 1235816652754715280, guid: 5f872e350eed5d44eb901ee7a86d159b, type: 3}
-  pawnCubePrefab: {fileID: 804300092581168002, guid: 66a62daa3c0650c4eb285b07e0a8e156, type: 3}
+  torqueAmount: 15
   displayName: No name
+  Allplayers: []
   mousePos: {x: 0, y: 0, z: 0}
 --- !u!114 &7074766620655772361
 MonoBehaviour:
@@ -98,7 +98,19 @@ MonoBehaviour:
       m_Calls: []
   m_ActionEvents:
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 2735300868769648466}
+        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+        m_MethodName: OnMove
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: 352ecbea-1bdd-4000-a782-5e70928b92f2
     m_ActionName: Player/Move[/Keyboard/w,/Keyboard/upArrow,/Keyboard/s,/Keyboard/downArrow,/Keyboard/a,/Keyboard/leftArrow,/Keyboard/d,/Keyboard/rightArrow]
   - m_PersistentCalls:

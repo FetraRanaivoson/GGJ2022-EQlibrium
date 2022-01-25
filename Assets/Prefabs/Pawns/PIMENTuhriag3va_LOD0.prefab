@@ -31,13 +31,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1892197732379193556}
-  m_LocalRotation: {x: -0.6490607, y: -0.6490607, z: 0.2805712, w: 0.2805712}
+  m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
   m_LocalPosition: {x: 1.088, y: 3.43, z: 1.287}
   m_LocalScale: {x: 4.6064405, y: 4.6064405, z: 4.6064405}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: -133.245, z: 90}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
 --- !u!33 &2785024428105115083
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -109,11 +109,11 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1892197732379193556}
   serializedVersion: 2
-  m_Mass: 0.2
+  m_Mass: 1
   m_Drag: 0
-  m_AngularDrag: 10
+  m_AngularDrag: 1
   m_UseGravity: 0
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -183,6 +183,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 814a87e6d70a9be449af7fc09ef50b38, type: 3}
   - {fileID: 8300000, guid: 1520bfeacbb35eb4a8832ffd35e2d73c, type: 3}
   sprite: {fileID: 21300000, guid: fe30a2ecb9a5ec546b15372891aea310, type: 3}
+  c: {fileID: 6987795755762625686}
 --- !u!82 &1181834236233174798
 AudioSource:
   m_ObjectHideFlags: 0
