@@ -50,5 +50,8 @@ public class LevelManager : NetworkBehaviour
         return pawnInventory[randomIndex];
     }
 
- 
+    internal void ResetLevel()
+    {
+        throw new NotImplementedException();
+    }
 }

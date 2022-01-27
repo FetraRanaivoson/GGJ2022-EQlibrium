@@ -4,11 +4,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Mirror;
+using TMPro;
 
-public class UIManager : MonoBehaviour
+public class UIManager : NetworkBehaviour
 {
     public GameObject loadingScreen;
     public Image nextPawnImage;
+    public TMP_Text timer;
 
     /// <summary>
     /// The event that happen on the shared UI when the game is unpaused
@@ -41,6 +43,46 @@ public class UIManager : MonoBehaviour
     {
         //Debug.Log(obj);
         nextPawnImage.sprite = gameObject.GetComponent<Pawn>().GetDisplayImage();
+    }
+
+    /// <summary>
+    /// The function that displays the current timer
+    /// </summary>
+    public void DisplayTimer(float currentTime)
+    {
+        CmdDisplayTimer(currentTime);
+       
+    }
+    [Command(requiresAuthority =false)]
+    public void CmdDisplayTimer(float currentTime)
+    {
+        RpcDisplayTimer(currentTime);
+
+    }
+    [ClientRpc]
+    public void RpcDisplayTimer(float currentTime)
+    {
+        timer.text = Mathf.Round(currentTime).ToString();
+
+    }
+
+    /// <summary>
+    /// The function that fades the timer
+    /// </summary>
+    public void FadeTimer()
+    {
+        CmdFadeTimer();
+    }
+    [Command(requiresAuthority =false)]
+    public void CmdFadeTimer()
+    {
+        RpcFadeTimer();
+
+    }
+    [ClientRpc]
+    public void RpcFadeTimer()
+    {
+        timer.text = null;
     }
 
 }

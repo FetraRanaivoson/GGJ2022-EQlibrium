@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Pawn
   - Preview
+  - Dead
+  - Top
   layers:
   - Default
   - TransparentFX
@@ -18,7 +20,7 @@ TagManager:
   - Pawn
   - Helper
   - Preview
-  - 
+  - Dead
   - 
   - 
   - 

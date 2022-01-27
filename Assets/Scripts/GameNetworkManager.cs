@@ -2,13 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
-
+using System;
 
 public class GameNetworkManager : NetworkManager
 {
     [SerializeField] List<PlayerController> players = new List<PlayerController>();
     LevelManager levelManager;
     UIManager UIManager;
+    DeadZone deadZone;
+    TimerManager timerManager;
 
     public override void OnServerAddPlayer(NetworkConnection conn)
     {
@@ -31,6 +33,8 @@ public class GameNetworkManager : NetworkManager
 
             levelManager = FindObjectOfType<LevelManager>();
             UIManager = FindObjectOfType<UIManager>();
+            deadZone = FindObjectOfType<DeadZone>();
+            timerManager = FindObjectOfType<TimerManager>();
         }
         // In case 2 players exist
         if (NetworkServer.active && players.Count > 1)
@@ -54,6 +58,7 @@ public class GameNetworkManager : NetworkManager
     /// Randomize once until the current player ends its turn
     /// </summary>
     bool shouldRandomizeNextPawn = true;
+    bool timerStarts = false;
 
     private void Update()
     {
@@ -65,6 +70,13 @@ public class GameNetworkManager : NetworkManager
                     players[i].SetOpponents(players);
             }
 
+            // Wait until everything settle
+            if (timerStarts)
+            {
+                return;
+            }
+
+            // Then randomize next pawn
             if (shouldRandomizeNextPawn && players.Count == 2)
             {
                 if (levelManager != null)
@@ -72,6 +84,7 @@ public class GameNetworkManager : NetworkManager
                     levelManager.SetNextPawn();
                     shouldRandomizeNextPawn = false;
                 }
+                // TO DO: shouldn't be only for one and then rpc?
                 for (int i = 0; i < players.Count; i++)
                 {
                     players[i].DisplayNextPawn(levelManager.nextPawn[0]);
@@ -92,15 +105,54 @@ public class GameNetworkManager : NetworkManager
             {
                 if (players[nextTurn].placedPawn[0])
                 {
+                    //  Temporarily deactivate
                     players[nextTurn].SrvSetTurn(false);
-                    if (nextTurn == 0)
-                        nextTurn++;
-                    else
-                        nextTurn--;
-                    shouldRandomizeNextPawn = true;
+                    //  Wait ?
+                    timerStarts = true;
+                    StartCoroutine(WaitToSettle());
                 }
             }
         }
     }
 
+    /// <summary>
+    /// The logic when waiting for every physics to settle
+    /// </summary>
+    IEnumerator WaitToSettle()
+    {
+        timerManager.SrvStartTimer(true);
+        timerManager.SrvTimerEnds(false);
+        while (!timerManager.timerEnds)
+        {
+            UIManager.DisplayTimer(timerManager.currentTime);
+            //Debug.Log(timerManager.currentTime);
+            // In the meantime, check if top table is inside dead zone
+            if (deadZone.isTouched)
+            {
+                timerManager.SrvStartTimer(false);
+                timerManager.SrvTimerEnds(true);
+
+                UIManager.FadeTimer();
+                //score manager increase next player score
+                //levelManager.ResetLevel();
+                timerStarts = false;
+                break;
+            }
+            yield return null;
+        }
+
+        timerManager.SrvStartTimer(false);
+        timerManager.SrvTimerEnds(true);
+
+        UIManager.FadeTimer();
+        timerStarts = false;
+
+        players[nextTurn].SrvSetTurn(false);
+        if (nextTurn == 0)
+            nextTurn++;
+        else
+            nextTurn--;
+
+        shouldRandomizeNextPawn = true;
+    }
 }
