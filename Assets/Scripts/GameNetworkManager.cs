@@ -136,10 +136,11 @@ public class GameNetworkManager : NetworkManager
                 //score manager increase next player score
                 //levelManager.ResetLevel();
                 timerStarts = false;
-                break;
+                yield return 0;
             }
             yield return null;
         }
+        deadZone.isTouched = false;
 
         timerManager.SrvStartTimer(false);
         timerManager.SrvTimerEnds(true);
