@@ -6,6 +6,49 @@ using System;
 
 public class LevelManager : NetworkBehaviour
 {
+    public GameObject basePrefab;
+    public GameObject midPrefab;
+    public GameObject topPrefab;
+
+
+    /// <summary>
+    /// The table where the players place pawn
+    /// </summary>
+    Table table;
+
+    TimerManager timerManager;
+
+    /// <summary>
+    /// The variable that lets us know that the level was reset
+    /// </summary>
+    [SyncVar]
+    [SerializeField] public bool isLevelReset = false; 
+
+    /// <summary>
+    /// The way for the server to set isLevelReset
+    /// </summary>
+    [Server]
+    public void SrvResetLevel(bool state)
+    {
+        isLevelReset = state;
+    }
+
+    /// <summary>
+    ///  The way for this manager to set isLevelReset
+    /// </summary>
+    [Command(requiresAuthority =false)]
+    private void CmdResetLevel(bool state)
+    {
+        SrvResetLevel(state);
+    }
+
+    private void Awake()
+    {
+        table = FindObjectOfType<Table>();
+        timerManager = FindObjectOfType<TimerManager>();
+    }
+ 
+
     /// <summary>
     /// The list of pawn to be used by the level manager
     /// </summary>
@@ -50,8 +93,24 @@ public class LevelManager : NetworkBehaviour
         return pawnInventory[randomIndex];
     }
 
-    internal void ResetLevel()
+    /// <summary>
+    /// The function that reset the level;
+    /// </summary>
+    public void ResetLevel(bool state)
     {
-        throw new NotImplementedException();
+        table.InitializeTransform();
+        CmdResetLevel(state);
+
+        //StartCoroutine(Wait());
+    }
+
+    IEnumerator Wait()
+    {
+        while (!timerManager.timerEnds)
+        {
+            yield return null;
+        }
+
+        table.CmdEnable(true, false, true);
     }
 }

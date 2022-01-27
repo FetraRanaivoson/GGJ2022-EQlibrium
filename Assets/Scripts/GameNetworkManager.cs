@@ -20,7 +20,7 @@ public class GameNetworkManager : NetworkManager
         PlayerController player = conn.identity.GetComponent<PlayerController>();
 
         // Set the name
-        player.SetDisplayName($"Player {numPlayers}");
+        player.SetDisplayName($"Player{numPlayers}");
 
         //Add to list
         players.Add(player);
@@ -81,12 +81,17 @@ public class GameNetworkManager : NetworkManager
             {
                 if (levelManager != null)
                 {
+                    //levelManager.ResetLevel(false);
                     levelManager.SetNextPawn();
                     shouldRandomizeNextPawn = false;
                 }
                 // TO DO: shouldn't be only for one and then rpc?
                 for (int i = 0; i < players.Count; i++)
                 {
+                    if (levelManager.nextPawn[0] == null)
+                    {
+                        levelManager.SetNextPawn();  
+                    }
                     players[i].DisplayNextPawn(levelManager.nextPawn[0]);
                 }
             }
@@ -125,28 +130,52 @@ public class GameNetworkManager : NetworkManager
         while (!timerManager.timerEnds)
         {
             UIManager.DisplayTimer(timerManager.currentTime);
-            //Debug.Log(timerManager.currentTime);
+
             // In the meantime, check if top table is inside dead zone
             if (deadZone.isTouched)
             {
                 timerManager.SrvStartTimer(false);
                 timerManager.SrvTimerEnds(true);
-
                 UIManager.FadeTimer();
-                //score manager increase next player score
-                //levelManager.ResetLevel();
+
+                //  Score manager increase next player score
+                if (nextTurn == 0)
+                {
+                    players[nextTurn + 1].SetScore();
+                }
+                else
+                {
+                    players[nextTurn - 1].SetScore();
+                }
+
+                //levelManager.ResetLevel(true);
+
                 timerStarts = false;
-                yield return 0;
+                deadZone.isTouched = false;
+
+                players[nextTurn].SrvSetTurn(false);
+                if (nextTurn == 0)
+                    nextTurn++;
+                else
+                    nextTurn--;
+
+                shouldRandomizeNextPawn = true;
+
+                yield break;
             }
+
+
             yield return null;
         }
+
+
+        timerStarts = false;
         deadZone.isTouched = false;
 
         timerManager.SrvStartTimer(false);
         timerManager.SrvTimerEnds(true);
-
         UIManager.FadeTimer();
-        timerStarts = false;
+
 
         players[nextTurn].SrvSetTurn(false);
         if (nextTurn == 0)

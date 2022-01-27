@@ -222,10 +222,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 8257533929167103331, guid: 45e258797d5e16548bf9daddeead6c05, type: 3}
-      propertyPath: timer
-      value: 
-      objectReference: {fileID: 2022296252}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 45e258797d5e16548bf9daddeead6c05, type: 3}
 --- !u!1001 &143453049
@@ -438,7 +434,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-108212
+  m_Name: pb_Mesh-12246
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -1016,7 +1012,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-108322
+  m_Name: pb_Mesh-113402
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -1275,7 +1271,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-108244
+  m_Name: pb_Mesh-141394
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -1764,7 +1760,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-108228
+  m_Name: pb_Mesh-12262
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -2243,17 +2239,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 14
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2022296252 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 2022296252, guid: 45e258797d5e16548bf9daddeead6c05, type: 3}
-  m_PrefabInstance: {fileID: 102435625}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &897545517165128159
 PrefabInstance:
   m_ObjectHideFlags: 0

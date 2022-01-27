@@ -12,6 +12,9 @@ public class UIManager : NetworkBehaviour
     public Image nextPawnImage;
     public TMP_Text timer;
 
+    public TMP_Text p1Score;
+    public TMP_Text p2Score;
+
     /// <summary>
     /// The event that happen on the shared UI when the game is unpaused
     /// </summary>
@@ -51,9 +54,9 @@ public class UIManager : NetworkBehaviour
     public void DisplayTimer(float currentTime)
     {
         CmdDisplayTimer(currentTime);
-       
+
     }
-    [Command(requiresAuthority =false)]
+    [Command(requiresAuthority = false)]
     public void CmdDisplayTimer(float currentTime)
     {
         RpcDisplayTimer(currentTime);
@@ -73,7 +76,7 @@ public class UIManager : NetworkBehaviour
     {
         CmdFadeTimer();
     }
-    [Command(requiresAuthority =false)]
+    [Command(requiresAuthority = false)]
     public void CmdFadeTimer()
     {
         RpcFadeTimer();
@@ -83,6 +86,17 @@ public class UIManager : NetworkBehaviour
     public void RpcFadeTimer()
     {
         timer.text = null;
+    }
+
+    /// <summary>
+    /// The setter for p1/p2 scores
+    /// </summary>
+    public void SetScore(int score, string name)
+    {
+        if (name == "Player1")
+            p1Score.text = score.ToString();
+        else if (name == "Player2")
+            p2Score.text = score.ToString();
     }
 
 }

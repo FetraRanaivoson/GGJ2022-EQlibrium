@@ -1,10 +1,8 @@
-using System.Collections;
+using Cinemachine;
+using Mirror;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using Cinemachine;
-using Mirror;
-using System;
 
 public class PlayerController : NetworkBehaviour
 {
@@ -16,6 +14,20 @@ public class PlayerController : NetworkBehaviour
 
     Vector2 moveDir;
     public float torqueAmount;
+
+    private void Awake()
+    {
+        cameraFreeLook = FindObjectOfType<CinemachineFreeLook>();
+        uiManager = FindObjectOfType<UIManager>();
+        soundManager = FindObjectOfType<SoundManager>();
+        helperManager = FindObjectOfType<HelperManager>();
+        levelManager = FindObjectOfType<LevelManager>();
+    }
+
+    void Start()
+    {
+        PickCamera();
+    }
 
     /// <summary>
     /// The name that identifies this player on the network
@@ -31,20 +43,25 @@ public class PlayerController : NetworkBehaviour
         displayName = name;
     }
 
-    private void Awake()
+    /// <summary>
+    /// The score of this player
+    /// </summary>
+    [SyncVar(hook = nameof(OnUpdateScore))] public int score = 0;
+
+    /// <summary>
+    /// The command run by server to set this player's score
+    /// </summary>
+    [Server]
+    public void SetScore()
     {
-        cameraFreeLook = FindObjectOfType<CinemachineFreeLook>();
-        uiManager = FindObjectOfType<UIManager>();
-        soundManager = FindObjectOfType<SoundManager>();
-        helperManager = FindObjectOfType<HelperManager>();
-        levelManager = FindObjectOfType<LevelManager>();
+        score++;
     }
 
-
-    void Start()
+    // The hook attribute can be used to specify a function
+    // to be called when the SyncVar changes value on the client.
+    private void OnUpdateScore(int oldScore, int newScore)
     {
-
-        PickCamera();
+        uiManager.SetScore(newScore, displayName);
     }
 
 
@@ -161,8 +178,6 @@ public class PlayerController : NetworkBehaviour
     /// <returns></returns>
     private Vector3 MousePosition => Mouse.current.position.ReadValue();
 
-    public bool IsThinking { get; internal set; }
-
     private bool canPlace = false;
 
     /// <summary>
@@ -193,6 +208,31 @@ public class PlayerController : NetworkBehaviour
         placedPawn[0] = state;
     }
 
+    /// <summary>
+    /// The command to destroy a pawn
+    /// </summary>
+    [Command(requiresAuthority = false)]
+    private void CmdDestroyPawn(GameObject gameObject)
+    {
+        SrvDestroyPawn(gameObject);
+    }
+
+    /// <summary>
+    ///  The server response for destroying a pawn
+    /// </summary>
+    [Server]
+    private void SrvDestroyPawn(GameObject gameObject)
+    {
+        RpcDestroyPawn(gameObject);
+    }
+
+    [ClientRpc]
+    private void RpcDestroyPawn(GameObject gameObject)
+    {
+        pawnInstances.Remove(gameObject);
+        NetworkServer.Destroy(gameObject);
+    }
+
 
     [ClientCallback]
     void Update()
@@ -212,8 +252,8 @@ public class PlayerController : NetworkBehaviour
             return;
         }
 
-        CmdSetMousePos(this.MousePosition);
 
+        CmdSetMousePos(this.MousePosition);
 
 
         // If this player has not turn
@@ -257,7 +297,7 @@ public class PlayerController : NetworkBehaviour
         }
 
         // On release right mouse button
-        if (Input.GetMouseButtonUp(1) && canPlace)
+        if (Input.GetMouseButtonUp(1) && canPlace && !levelManager.isLevelReset)
         {
             helperManager.CmdDeleteHelper();
             //if (!Mouse.current.rightButton.wasPressedThisFrame) { return; }
@@ -270,26 +310,63 @@ public class PlayerController : NetworkBehaviour
             //PlacePawn(hit.point + Vector3.up * 1.2f);
             PlacePawn(hit.point + Vector3.up * .95f);
             CmdPlacedPawn(true);
-            CmdIncrementtNextPawnIndex();
+
+            CmdIncrementNextPawnIndex();
         }
     }
+
+    /// <summary>
+    /// Run by the manager to destroy existing pawns when round ends
+    /// </summary>
+    public void DestroyExistingPawns()
+    {
+        // Destroy all pawns when the level is reset (= someone made the table fallen)
+        if (levelManager.isLevelReset && pawnInstances != null && pawnInstances.Count > 0)
+        {
+            foreach (var pawn in pawnInstances)
+            {
+                if (pawn != pawnInstances[levelManager.nextPawnIndex] && pawn != null)
+                    CmdDestroyPawn(pawn);
+            }
+
+        }
+    }
+
     /// <summary>
     /// The command to be called by this player after placing a pawn to increment the next pawn index.
     /// That index is crucial because we need to know what to "really" spawn on the table next among our 
     /// lists of pawn "pawnInstances". And we always need the last one, that's we always need to increment the index.
     /// </summary>
     [Command]
-    public void CmdIncrementtNextPawnIndex()
+    public void CmdIncrementNextPawnIndex()
     {
-        RpcIncrementtNextPawnIndex();
+        RpcIncrementNextPawnIndex();
     }
     /// <summary>
     /// The command sent to all clients to increment the next pawn index
     /// </summary>
     [ClientRpc]
-    private void RpcIncrementtNextPawnIndex()
+    private void RpcIncrementNextPawnIndex()
     {
         levelManager.nextPawnIndex++;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [Command]
+    public void CmdResetNextPawnIndex()
+    {
+        RpcResetNextPawnIndex();
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [ClientRpc]
+    private void RpcResetNextPawnIndex()
+    {
+        levelManager.nextPawnIndex = 0;
     }
 
     /// <summary>
@@ -385,8 +462,15 @@ public class PlayerController : NetworkBehaviour
         GameObject pawnInstance = Instantiate(nextPawn, Vector3.up * 1500, Quaternion.identity);
         NetworkServer.Spawn(pawnInstance);
         pawnInstances.Add(pawnInstance);
+        //AddPawn(pawnInstance);
 
         CmdDisplayNextPawn(pawnInstance);
+    }
+
+    [ClientRpc]
+    public void AddPawn(GameObject pawn)
+    {
+        pawnInstances.Add(pawn);
     }
 
     /// <summary>
