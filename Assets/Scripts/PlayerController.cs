@@ -230,19 +230,30 @@ public class PlayerController : NetworkBehaviour
         // While the user is holding the mouse right button, place a preview (only ont the table)
         if (Input.GetMouseButton(1))
         {
+            // Do not use live preview if we don't hit the top table
             if (!Physics.Raycast(ray, out RaycastHit hitPreview, Mathf.Infinity, LayerMask.GetMask("Table")))
             {
                 canPlace = false;
                 return;
             }
-            helperManager.Highlight(hitPreview.point + Vector3.up * .1f, mousePos);
             canPlace = true;
+            helperManager.Highlight(hitPreview.point + Vector3.up * .1f, mousePos);
 
             //Get the move direction from keyboard and torque the next pawn
             CmdTorque(moveDir, pawnInstances[levelManager.nextPawnIndex], torqueAmount, Time.deltaTime);
 
+            if (pawnInstances[levelManager.nextPawnIndex].GetComponent<Pawn>().previewTrigger.isTriggeringPawn)
+            {
+                helperManager.CmdDeleteHelper();
+                CmdOnPlayerFailedToPlacePawn(pawnInstances[levelManager.nextPawnIndex]);
+                canPlace = false;
+            }
+
             // Live preview the pawn
-            CmdLivePreviewPawn(hitPreview.point);
+            if (canPlace)
+                CmdLivePreviewPawn(hitPreview.point);
+            else
+                CmdLivePreviewPawn(hitPreview.point + Vector3.up * 1.5f);
         }
 
         // On release right mouse button
@@ -316,7 +327,7 @@ public class PlayerController : NetworkBehaviour
         RpcOnPlacingPawnSound(pawnInstances[levelManager.nextPawnIndex]);
     }
 
-   
+
     /// <summary>
     /// The gravity configuration to be made for the spawned object to all clients
     /// </summary>
@@ -358,8 +369,8 @@ public class PlayerController : NetworkBehaviour
     {
         //uiManager.DisplayNextPawn(gameObject);
 
-       SrvDisplayNextPawn(nextPawn);
-        
+        SrvDisplayNextPawn(nextPawn);
+
     }
 
     /// <summary>
@@ -381,21 +392,39 @@ public class PlayerController : NetworkBehaviour
     /// <summary>
     /// The list of every spawned pawns from the very beginning.
     /// </summary>
-    [SerializeField] public readonly SyncList<GameObject> pawnInstances = new SyncList<GameObject>() {};
-    
+    [SerializeField] public readonly SyncList<GameObject> pawnInstances = new SyncList<GameObject>() { };
+
 
     /// <summary>
     /// The command run by this player for all cients when the pawn is spawned: collider set, kinematic set, gravity set, ui display set.
     /// </summary>
-    [Command(requiresAuthority =false)]
+    [Command(requiresAuthority = false)]
     private void CmdDisplayNextPawn(GameObject inst)
     {
-        RpcEnableCollider(inst, false);
+        //RpcEnableCollider(inst, false);
         RpcIsKinematic(inst, true);
         RpcToggleGravity(inst, false);
         RpcDisplayNextPawn(inst);
     }
 
+    /// <summary>
+    /// The command to reset the pawn state and location to where it was if this player failed to place the pawn 
+    /// </summary>
+    [Command(requiresAuthority = false)]
+    private void CmdOnPlayerFailedToPlacePawn(GameObject inst)
+    {
+        // Do not forget tho reset the position
+        //RpcResetPawnTransform(inst, 1500);
+        RpcEnableCollider(inst, false);
+        RpcIsKinematic(inst, true);
+        RpcToggleGravity(inst, false);
+    }
+
+    [ClientRpc]
+    private void RpcResetPawnTransform(GameObject inst, float height)
+    {
+        inst.transform.position = Vector3.up * height;
+    }
 
     /// <summary>
     /// The function that tells the manager to display the next pawn on the ui for all clients

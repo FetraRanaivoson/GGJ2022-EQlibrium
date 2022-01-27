@@ -12,6 +12,7 @@ public class HelperManager : NetworkBehaviour
     Vector3 lastMousePos = Vector3.zero;
     Vector3 currentMousePos = Vector3.zero;
 
+
     /// <summary>
     /// The function to be called when instantiating an helper
     /// </summary>
@@ -37,6 +38,7 @@ public class HelperManager : NetworkBehaviour
     public void CmdDeleteHelper()
     {
         //if (!NetworkClient.ready)
+        if (helpers.Count > 0 && helpers[helpers.Count - 1] != null)
             SrvDeleteHelper(helpers[helpers.Count - 1]);
     }
 
@@ -59,11 +61,13 @@ public class HelperManager : NetworkBehaviour
         {
             if (i != helpers.Count - 1 && helpers.Count > 1 && helpers[i] != null)
             {
-                SrvDeleteHelper(helpers[i]);
+                //if (!helpers[i].GetComponent<Helper>().IsCollidingPawn())
+                    SrvDeleteHelper(helpers[i]);
             }
         }
         // Delete last helper after a few second
         //StartCoroutine(SrvDeleteHelperAfter(2.5f));
+
     }
 
 
@@ -78,18 +82,17 @@ public class HelperManager : NetworkBehaviour
         helpers.Add(helper);
     }
 
-    /// <summary>
-    /// The coroutine that let delete the last helper on the scene 
-    /// </summary>
-    /// <returns></returns>
-    IEnumerator SrvDeleteHelperAfter(float second)
-    {
-        yield return new WaitForSeconds(second);
-        if (helpers.Count > 0 && helpers[helpers.Count - 1] != null)
-        {
-            SrvDeleteHelper(helpers[helpers.Count - 1]);
-        }
-    }
-
+    ///// <summary>
+    ///// The coroutine that let delete the last helper on the scene 
+    ///// </summary>
+    ///// <returns></returns>
+    //IEnumerator SrvDeleteHelperAfter(float second)
+    //{
+    //    yield return new WaitForSeconds(second);
+    //    if (helpers.Count > 0 && helpers[helpers.Count - 1] != null)
+    //    {
+    //        SrvDeleteHelper(helpers[helpers.Count - 1]);
+    //    }
+    //}
 
 }

@@ -1,5 +1,58 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3555722441714558742
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8649045405583685981}
+  - component: {fileID: 3753040635349128273}
+  - component: {fileID: 2464554857554889195}
+  m_Layer: 9
+  m_Name: ColliderHelper
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8649045405583685981
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3555722441714558742}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.917, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 8474134794388835553}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!33 &3753040635349128273
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3555722441714558742}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!65 &2464554857554889195
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3555722441714558742}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 3.459252, y: 1.3970523, z: 3.2892654}
+  m_Center: {x: -0.056360066, y: -0.2385261, z: -0.058654398}
 --- !u!1 &9138362324906890843
 GameObject:
   m_ObjectHideFlags: 0
@@ -15,7 +68,7 @@ GameObject:
   - component: {fileID: 8666675120769874121}
   - component: {fileID: -403038660298919585}
   - component: {fileID: 7132154065750238194}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Helper
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -32,7 +85,8 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0, y: 0, z: 0}
   m_LocalScale: {x: 0.4, y: 1, z: 0.4}
-  m_Children: []
+  m_Children:
+  - {fileID: 8649045405583685981}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -146,6 +200,8 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   material: {fileID: 2100000, guid: 89e26708835d1264fbe165148e949f2c, type: 2}
+  colliderHelper: {fileID: 3555722441714558742}
+  isCollidingPawn: 0
 --- !u!135 &7132154065750238194
 SphereCollider:
   m_ObjectHideFlags: 0

@@ -18,6 +18,9 @@ public class Pawn : NetworkBehaviour
     public Sprite sprite;
     public Collider c;
 
+    public PreviewTrigger previewTrigger;
+    
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -57,6 +60,7 @@ public class Pawn : NetworkBehaviour
         audioSource.Play();
     }
 
+
     private void OnCollisionEnter(Collision collision)
     {
         CmdOnCollisionEnter(collision.gameObject);
@@ -72,14 +76,14 @@ public class Pawn : NetworkBehaviour
     }
 
     /// <summary>
-    /// The command that request the server to play collision sounds
+    /// The command on collision
     /// </summary>
     [Command(requiresAuthority = false)]
     public void CmdOnCollisionEnter(GameObject gameObject)
     {
         if (!gameObject.CompareTag("Pawn"))
         {
-            SrvOnColllisionEnter();
+            SrvOnColllisionEnterSound();
         }
     }
 
@@ -87,16 +91,18 @@ public class Pawn : NetworkBehaviour
     /// The server response to play collision sounds
     /// </summary>
     [Server]
-    private void SrvOnColllisionEnter()
+    private void SrvOnColllisionEnterSound()
     {
-        ClientOnCollisionEnter();
+        ClientOnCollisionEnterSound();
     }
+
+   
 
     /// <summary>
     /// The function that let play collision sound of this object to all clients
     /// </summary>
     [ClientRpc]
-    private void ClientOnCollisionEnter()
+    private void ClientOnCollisionEnterSound()
     {
         audioSource.clip = placedClip[UnityEngine.Random.Range(0, placedClip.Length)];
         audioSource.Play();
