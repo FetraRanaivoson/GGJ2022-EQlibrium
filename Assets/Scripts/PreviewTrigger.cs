@@ -27,7 +27,7 @@ public class PreviewTrigger : MonoBehaviour
         }
         if (triggered.gameObject.CompareTag("Preview"))
         {
-            //SrvOnTriggerEnterPreview();
+            SrvOnTriggerEnterPreview();
         }
     }
 
@@ -51,7 +51,7 @@ public class PreviewTrigger : MonoBehaviour
     {
         if (triggered.gameObject.CompareTag("Preview"))
         {
-            //SrvOnTriggerExitPreview();
+            SrvOnTriggerExitPreview();
         }
     }
 

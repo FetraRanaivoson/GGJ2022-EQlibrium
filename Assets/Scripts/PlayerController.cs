@@ -401,7 +401,7 @@ public class PlayerController : NetworkBehaviour
     [Command(requiresAuthority = false)]
     private void CmdDisplayNextPawn(GameObject inst)
     {
-        //RpcEnableCollider(inst, false);
+        RpcEnableCollider(inst, false);
         RpcIsKinematic(inst, true);
         RpcToggleGravity(inst, false);
         RpcDisplayNextPawn(inst);
@@ -413,8 +413,6 @@ public class PlayerController : NetworkBehaviour
     [Command(requiresAuthority = false)]
     private void CmdOnPlayerFailedToPlacePawn(GameObject inst)
     {
-        // Do not forget tho reset the position
-        //RpcResetPawnTransform(inst, 1500);
         RpcEnableCollider(inst, false);
         RpcIsKinematic(inst, true);
         RpcToggleGravity(inst, false);
