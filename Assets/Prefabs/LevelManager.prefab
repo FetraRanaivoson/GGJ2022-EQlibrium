@@ -63,6 +63,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
+  basePrefab: {fileID: 5367936305432658133, guid: f0919492690f739468a5703f262f115c, type: 3}
+  midPrefab: {fileID: 8685606522291787203, guid: f0786f9f403cb1d4a81f8640ecf0a302, type: 3}
+  topPrefab: {fileID: 7440403750335512664, guid: 21e8c7a64ef310246957b898a516ac06, type: 3}
+  isLevelReset: 0
   pawnInventory:
   - {fileID: 1235816652754715280, guid: 5f872e350eed5d44eb901ee7a86d159b, type: 3}
   - {fileID: 804300092581168002, guid: 66a62daa3c0650c4eb285b07e0a8e156, type: 3}

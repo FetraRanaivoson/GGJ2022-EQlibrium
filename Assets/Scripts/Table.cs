@@ -12,36 +12,36 @@ public class Table : NetworkBehaviour
         InitialTransform = this.transform;
     }
 
-    /// <summary>
-    /// The setter for this transform
-    /// </summary>
-    [Command(requiresAuthority = false)]
-    public void InitializeTransform()
-    {
-        RpcInitializeTransform();
-    }
+    ///// <summary>
+    ///// The setter for this transform
+    ///// </summary>
+    //[Command(requiresAuthority = false)]
+    //public void InitializeTransform()
+    //{
+    //    RpcInitializeTransform();
+    //}
 
-    [ClientRpc]
-    public void RpcInitializeTransform()
-    {
-        //GetComponent<Collider>().enabled = false;
-        //GetComponent<Rigidbody>().isKinematic = true;
-        //GetComponent<Rigidbody>().useGravity = false;
-        this.transform.position = InitialTransform.position;
-        this.transform.rotation = Quaternion.identity;
-    }
+    //[ClientRpc]
+    //public void RpcInitializeTransform()
+    //{
+    //    //GetComponent<Collider>().enabled = false;
+    //    //GetComponent<Rigidbody>().isKinematic = true;
+    //    //GetComponent<Rigidbody>().useGravity = false;
+    //    this.transform.position = InitialTransform.position;
+    //    this.transform.rotation = Quaternion.identity;
+    //}
 
-    [Command(requiresAuthority =false)]
-    public void CmdEnable(bool coll, bool isKinematic, bool gravity)
-    {
-        RpcCmdEnable(coll, isKinematic, gravity);
+    //[Command(requiresAuthority =false)]
+    //public void CmdEnable(bool coll, bool isKinematic, bool gravity)
+    //{
+    //    RpcCmdEnable(coll, isKinematic, gravity);
 
-    }
-    [ClientRpc]
-    public void RpcCmdEnable(bool coll, bool isKinematic, bool gravity)
-    {
-        GetComponent<Collider>().enabled = coll;
-        GetComponent<Rigidbody>().isKinematic = isKinematic;
-        GetComponent<Rigidbody>().useGravity = gravity;
-    }
+    //}
+    //[ClientRpc]
+    //public void RpcCmdEnable(bool coll, bool isKinematic, bool gravity)
+    //{
+    //    GetComponent<Collider>().enabled = coll;
+    //    GetComponent<Rigidbody>().isKinematic = isKinematic;
+    //    GetComponent<Rigidbody>().useGravity = gravity;
+    //}
 }

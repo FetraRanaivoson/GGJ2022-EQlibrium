@@ -8,6 +8,8 @@ public class DeadZone : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        if(other.gameObject == null)
+            return;
         if (other.CompareTag("Top"))
         {
             isTouched = true;

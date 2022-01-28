@@ -41,6 +41,8 @@ public class GameNetworkManager : NetworkManager
         {
             players[0].OnUnPauseGame();
             players[0].OnNotWaitingForOpponent();
+
+            levelManager.InstantiatePlatform();
         }
 
     }
@@ -88,10 +90,6 @@ public class GameNetworkManager : NetworkManager
                 // TO DO: shouldn't be only for one and then rpc?
                 for (int i = 0; i < players.Count; i++)
                 {
-                    if (levelManager.nextPawn[0] == null)
-                    {
-                        levelManager.SetNextPawn();  
-                    }
                     players[i].DisplayNextPawn(levelManager.nextPawn[0]);
                 }
             }
@@ -138,7 +136,7 @@ public class GameNetworkManager : NetworkManager
                 timerManager.SrvTimerEnds(true);
                 UIManager.FadeTimer();
 
-                //  Score manager increase next player score
+                //  Increase player score
                 if (nextTurn == 0)
                 {
                     players[nextTurn + 1].SetScore();
@@ -149,6 +147,7 @@ public class GameNetworkManager : NetworkManager
                 }
 
                 //levelManager.ResetLevel(true);
+                levelManager.DestroyPlatform();
 
                 timerStarts = false;
                 deadZone.isTouched = false;
