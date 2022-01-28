@@ -30,6 +30,7 @@ public class TimerManager : NetworkBehaviour
     [SerializeField] public float currentTime = 0;
 
 
+    [ServerCallback]
     void Update()
     {
         if (startTimer)
@@ -48,6 +49,11 @@ public class TimerManager : NetworkBehaviour
     [Command(requiresAuthority = false)]
     private void CmdUpdateTimer()
     {
+        if (!NetworkClient.ready)
+        {
+            return;
+        }
+
         if (currentTime >= MAX_TIME)
         {
             CmdSetCurrentTime(0);

@@ -8,6 +8,8 @@ TagManager:
   - Preview
   - Dead
   - Top
+  - Base
+  - Ground
   layers:
   - Default
   - TransparentFX

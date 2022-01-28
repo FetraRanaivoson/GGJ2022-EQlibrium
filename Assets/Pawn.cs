@@ -19,12 +19,13 @@ public class Pawn : NetworkBehaviour
     public Collider c;
 
     public PreviewTrigger previewTrigger;
-    
+    LevelManager levelManager;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
         audioSource = GetComponent<AudioSource>();
+        levelManager = FindObjectOfType<LevelManager>();
     }
 
     /// <summary>
@@ -81,10 +82,34 @@ public class Pawn : NetworkBehaviour
     [Command(requiresAuthority = false)]
     public void CmdOnCollisionEnter(GameObject gameObject)
     {
-        if (!gameObject.CompareTag("Pawn"))
+        if (gameObject.CompareTag("Ground"))
+        {
+            SrvDestroyMe();
+            //return;
+        }
+
+        else if (!gameObject.CompareTag("Pawn") || !gameObject.CompareTag("Ground"))
         {
             SrvOnColllisionEnterSound();
         }
+
+       
+    }
+
+    /// <summary>
+    /// Auto destruction
+    /// </summary>
+    [Server]
+    private void SrvDestroyMe()
+    {
+        levelManager.CmdRemovePawn(this.gameObject);
+        RpcDestroyMe();   
+    }
+
+    [ClientRpc]
+    private void RpcDestroyMe()
+    {
+        NetworkServer.Destroy(this.gameObject);
     }
 
     /// <summary>

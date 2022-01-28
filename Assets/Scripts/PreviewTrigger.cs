@@ -23,7 +23,6 @@ public class PreviewTrigger : MonoBehaviour
         if(triggered.gameObject == parent)
         {
             isTriggeringPawn = false;
-            return;
         }
         if (triggered.gameObject.CompareTag("Preview"))
         {

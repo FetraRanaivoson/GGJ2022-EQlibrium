@@ -62,6 +62,7 @@ public class GameNetworkManager : NetworkManager
     bool shouldRandomizeNextPawn = true;
     bool timerStarts = false;
 
+
     private void Update()
     {
         if (NetworkServer.active && players.Count > 1)
@@ -71,6 +72,9 @@ public class GameNetworkManager : NetworkManager
                 if (players[i] != null && NetworkServer.active)
                     players[i].SetOpponents(players);
             }
+        
+    
+           
 
             // Wait until everything settle
             if (timerStarts)
@@ -86,12 +90,15 @@ public class GameNetworkManager : NetworkManager
                     //levelManager.ResetLevel(false);
                     levelManager.SetNextPawn();
                     shouldRandomizeNextPawn = false;
+
+                    levelManager.DisplayNextPawn();
                 }
                 // TO DO: shouldn't be only for one and then rpc?
-                for (int i = 0; i < players.Count; i++)
-                {
-                    players[i].DisplayNextPawn(levelManager.nextPawn[0]);
-                }
+                //for (int i = 0; i < players.Count; i++)
+                //{
+                //players[i].DisplayNextPawn(levelManager.nextPawn[0]);
+
+                //}
             }
 
             //  Setting turn
@@ -125,13 +132,19 @@ public class GameNetworkManager : NetworkManager
     {
         timerManager.SrvStartTimer(true);
         timerManager.SrvTimerEnds(false);
+
         while (!timerManager.timerEnds)
         {
+            // Live display the timer
             UIManager.DisplayTimer(timerManager.currentTime);
 
             // In the meantime, check if top table is inside dead zone
             if (deadZone.isTouched)
             {
+                // To prevent going here many times
+                deadZone.isTouched = false;
+
+                // Reset timer
                 timerManager.SrvStartTimer(false);
                 timerManager.SrvTimerEnds(true);
                 UIManager.FadeTimer();
@@ -146,42 +159,57 @@ public class GameNetworkManager : NetworkManager
                     players[nextTurn - 1].SetScore();
                 }
 
-                //levelManager.ResetLevel(true);
+                //  Delete the platform
                 levelManager.DestroyPlatform();
 
-                timerStarts = false;
-                deadZone.isTouched = false;
+                // Wait for everything to be destroyed then spawn another platform
+                StartCoroutine(WaitForDestruction());
 
+                //  To let us randomize pawn again
+                timerStarts = false;
+                shouldRandomizeNextPawn = true;
+
+                // Set the next turn
                 players[nextTurn].SrvSetTurn(false);
                 if (nextTurn == 0)
                     nextTurn++;
                 else
                     nextTurn--;
 
-                shouldRandomizeNextPawn = true;
-
                 yield break;
             }
-
-
             yield return null;
         }
-
-
-        timerStarts = false;
-        deadZone.isTouched = false;
-
+        //  In case timer ends without touching the dead zone
+        // Reset timer
         timerManager.SrvStartTimer(false);
         timerManager.SrvTimerEnds(true);
         UIManager.FadeTimer();
 
+        //  To let us randomize pawn again
+        timerStarts = false;
+        shouldRandomizeNextPawn = true;
 
+        // To prevent going here many times
+        deadZone.isTouched = false;
+
+        // Set the next turn
         players[nextTurn].SrvSetTurn(false);
         if (nextTurn == 0)
             nextTurn++;
         else
             nextTurn--;
 
-        shouldRandomizeNextPawn = true;
+
+    }
+
+    IEnumerator WaitForDestruction()
+    {
+        do
+        {
+            yield return null;
+        } while (levelManager.pawnInstances.Count > 1);
+        yield return new WaitForSeconds(1.5f);
+        levelManager.InstantiatePlatform();
     }
 }

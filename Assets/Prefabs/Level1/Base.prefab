@@ -17,7 +17,7 @@ GameObject:
   - component: {fileID: 5367936305432658142}
   m_Layer: 0
   m_Name: Base
-  m_TagString: Untagged
+  m_TagString: Base
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
@@ -8124,5 +8124,5 @@ MonoBehaviour:
   sceneId: 0
   serverOnly: 0
   visible: 0
-  m_AssetId: 
+  m_AssetId: f0919492690f739468a5703f262f115c
   hasSpawned: 0

@@ -208,31 +208,6 @@ public class PlayerController : NetworkBehaviour
         placedPawn[0] = state;
     }
 
-    /// <summary>
-    /// The command to destroy a pawn
-    /// </summary>
-    [Command(requiresAuthority = false)]
-    private void CmdDestroyPawn(GameObject gameObject)
-    {
-        SrvDestroyPawn(gameObject);
-    }
-
-    /// <summary>
-    ///  The server response for destroying a pawn
-    /// </summary>
-    [Server]
-    private void SrvDestroyPawn(GameObject gameObject)
-    {
-        RpcDestroyPawn(gameObject);
-    }
-
-    [ClientRpc]
-    private void RpcDestroyPawn(GameObject gameObject)
-    {
-        pawnInstances.Remove(gameObject);
-        NetworkServer.Destroy(gameObject);
-    }
-
 
     [ClientCallback]
     void Update()
@@ -276,16 +251,25 @@ public class PlayerController : NetworkBehaviour
                 canPlace = false;
                 return;
             }
+
+            if (hitPreview.collider.gameObject == null)
+                return;
+
             canPlace = true;
             helperManager.Highlight(hitPreview.point + Vector3.up * .1f, mousePos);
 
             //Get the move direction from keyboard and torque the next pawn
-            CmdTorque(moveDir, pawnInstances[levelManager.nextPawnIndex], torqueAmount, Time.deltaTime);
+            //CmdTorque(moveDir, pawnInstances[levelManager.nextPawnIndex], torqueAmount, Time.deltaTime);
+            CmdTorque(moveDir, levelManager.pawnInstances[levelManager.pawnInstances.Count-1], torqueAmount, Time.deltaTime);
 
-            if (pawnInstances[levelManager.nextPawnIndex].GetComponent<Pawn>().previewTrigger.isTriggeringPawn)
+            //if (pawnInstances[levelManager.nextPawnIndex].GetComponent<Pawn>().previewTrigger.isTriggeringPawn)
+            if (levelManager.pawnInstances.Count == 0)
+                return;
+
+            if (levelManager.pawnInstances[levelManager.pawnInstances.Count - 1].GetComponent<Pawn>().previewTrigger.isTriggeringPawn)
             {
                 helperManager.CmdDeleteHelper();
-                CmdOnPlayerFailedToPlacePawn(pawnInstances[levelManager.nextPawnIndex]);
+                CmdOnPlayerFailedToPlacePawn(levelManager.pawnInstances[levelManager.pawnInstances.Count - 1]);
                 canPlace = false;
             }
 
@@ -310,65 +294,10 @@ public class PlayerController : NetworkBehaviour
             //PlacePawn(hit.point + Vector3.up * 1.2f);
             PlacePawn(hit.point + Vector3.up * .95f);
             CmdPlacedPawn(true);
-
-            CmdIncrementNextPawnIndex();
         }
     }
 
-    /// <summary>
-    /// Run by the manager to destroy existing pawns when round ends
-    /// </summary>
-    public void DestroyExistingPawns()
-    {
-        // Destroy all pawns when the level is reset (= someone made the table fallen)
-        if (levelManager.isLevelReset && pawnInstances != null && pawnInstances.Count > 0)
-        {
-            foreach (var pawn in pawnInstances)
-            {
-                if (pawn != pawnInstances[levelManager.nextPawnIndex] && pawn != null)
-                    CmdDestroyPawn(pawn);
-            }
-
-        }
-    }
-
-    /// <summary>
-    /// The command to be called by this player after placing a pawn to increment the next pawn index.
-    /// That index is crucial because we need to know what to "really" spawn on the table next among our 
-    /// lists of pawn "pawnInstances". And we always need the last one, that's we always need to increment the index.
-    /// </summary>
-    [Command]
-    public void CmdIncrementNextPawnIndex()
-    {
-        RpcIncrementNextPawnIndex();
-    }
-    /// <summary>
-    /// The command sent to all clients to increment the next pawn index
-    /// </summary>
-    [ClientRpc]
-    private void RpcIncrementNextPawnIndex()
-    {
-        levelManager.nextPawnIndex++;
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    [Command]
-    public void CmdResetNextPawnIndex()
-    {
-        RpcResetNextPawnIndex();
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    [ClientRpc]
-    private void RpcResetNextPawnIndex()
-    {
-        levelManager.nextPawnIndex = 0;
-    }
-
+  
     /// <summary>
     /// The function to be called when placing a pawn
     /// </summary>
@@ -392,16 +321,23 @@ public class PlayerController : NetworkBehaviour
     [Server]
     public void SrvPlacePawn(Vector3 hitPoint)
     {
-        //GameObject pawnObj = Instantiate(pawnCylinderPrefab, hitPoint, Quaternion.identity);
-        //GameObject pawnObj = Instantiate(levelManager.nextPawn[0], hitPoint, Quaternion.identity);
-        //GameObject pawnObj = Instantiate(gos[0], hitPoint, Quaternion.identity);
-        pawnInstances[levelManager.nextPawnIndex].transform.position = hitPoint;
+        //pawnInstances[levelManager.nextPawnIndex].transform.position = hitPoint;
+        levelManager.pawnInstances[levelManager.pawnInstances.Count - 1].transform.position = hitPoint;
+        
         //NetworkServer.Spawn(pawnObj);
         //RpcToggleGravity(pawnObj, true);
-        RpcEnableCollider(pawnInstances[levelManager.nextPawnIndex], true);
-        RpcIsKinematic(pawnInstances[levelManager.nextPawnIndex], false);
-        RpcToggleGravity(pawnInstances[levelManager.nextPawnIndex], true);
-        RpcOnPlacingPawnSound(pawnInstances[levelManager.nextPawnIndex]);
+
+        //RpcEnableCollider(pawnInstances[levelManager.nextPawnIndex], true);
+        RpcEnableCollider(levelManager.pawnInstances[levelManager.pawnInstances.Count - 1], true);
+
+        //RpcIsKinematic(pawnInstances[levelManager.nextPawnIndex], false);
+        RpcIsKinematic(levelManager.pawnInstances[levelManager.pawnInstances.Count - 1], false);
+
+        //RpcToggleGravity(pawnInstances[levelManager.nextPawnIndex], true);
+        RpcToggleGravity(levelManager.pawnInstances[levelManager.pawnInstances.Count - 1], true);
+
+        //RpcOnPlacingPawnSound(pawnInstances[levelManager.nextPawnIndex]);
+        RpcOnPlacingPawnSound(levelManager.pawnInstances[levelManager.pawnInstances.Count - 1]);
     }
 
 
@@ -446,7 +382,7 @@ public class PlayerController : NetworkBehaviour
     {
         //uiManager.DisplayNextPawn(gameObject);
 
-        SrvDisplayNextPawn(nextPawn);
+        //SrvDisplayNextPawn(nextPawn);
 
     }
 
@@ -456,40 +392,40 @@ public class PlayerController : NetworkBehaviour
     /// WE WILL NEED THE COMPONENT PAWN TO GET THE DISPLAY IMAGE OF THE PAWN
     /// WHOSE VALUE IS THEN APPLIED TO THE NEXT PAWN DISPLAY IMAGE OF THE UI MANAGER
     /// </summary>
-    [Server]
-    private void SrvDisplayNextPawn(GameObject nextPawn)
-    {
-        GameObject pawnInstance = Instantiate(nextPawn, Vector3.up * 1500, Quaternion.identity);
-        NetworkServer.Spawn(pawnInstance);
-        pawnInstances.Add(pawnInstance);
-        //AddPawn(pawnInstance);
+    //[Server]
+    //private void SrvDisplayNextPawn(GameObject nextPawn)
+    //{
+    //    GameObject pawnInstance = Instantiate(nextPawn, Vector3.up * 1500, Quaternion.identity);
+    //    NetworkServer.Spawn(pawnInstance);
+    //    pawnInstances.Add(pawnInstance);
+    //    //AddPawn(pawnInstance);
 
-        CmdDisplayNextPawn(pawnInstance);
-    }
+    //    CmdDisplayNextPawn(pawnInstance);
+    //}
 
-    [ClientRpc]
-    public void AddPawn(GameObject pawn)
-    {
-        pawnInstances.Add(pawn);
-    }
+    //[ClientRpc]
+    //public void AddPawn(GameObject pawn)
+    //{
+    //    pawnInstances.Add(pawn);
+    //}
 
     /// <summary>
     /// The list of every spawned pawns from the very beginning.
     /// </summary>
-    [SerializeField] public readonly SyncList<GameObject> pawnInstances = new SyncList<GameObject>() { };
+    //[SerializeField] public readonly SyncList<GameObject> pawnInstances = new SyncList<GameObject>() { };
 
 
     /// <summary>
     /// The command run by this player for all cients when the pawn is spawned: collider set, kinematic set, gravity set, ui display set.
     /// </summary>
-    [Command(requiresAuthority = false)]
-    private void CmdDisplayNextPawn(GameObject inst)
-    {
-        RpcEnableCollider(inst, false);
-        RpcIsKinematic(inst, true);
-        RpcToggleGravity(inst, false);
-        RpcDisplayNextPawn(inst);
-    }
+    //[Command(requiresAuthority = false)]
+    //private void CmdDisplayNextPawn(GameObject inst)
+    //{
+    //    RpcEnableCollider(inst, false);
+    //    RpcIsKinematic(inst, true);
+    //    RpcToggleGravity(inst, false);
+    //    RpcDisplayNextPawn(inst);
+    //}
 
     /// <summary>
     /// The command to reset the pawn state and location to where it was if this player failed to place the pawn 
@@ -502,22 +438,22 @@ public class PlayerController : NetworkBehaviour
         RpcToggleGravity(inst, false);
     }
 
-    [ClientRpc]
-    private void RpcResetPawnTransform(GameObject inst, float height)
-    {
-        inst.transform.position = Vector3.up * height;
-    }
+    //[ClientRpc]
+    //private void RpcResetPawnTransform(GameObject inst, float height)
+    //{
+    //    inst.transform.position = Vector3.up * height;
+    //}
 
     /// <summary>
     /// The function that tells the manager to display the next pawn on the ui for all clients
     /// Without the paramater GameObject to be an INSTANCE, this would be impossible.
     /// Prefab doesn't work
     /// </summary>
-    [ClientRpc]
-    private void RpcDisplayNextPawn(GameObject inst)
-    {
-        uiManager.DisplayNextPawn(inst);
-    }
+    //[ClientRpc]
+    //private void RpcDisplayNextPawn(GameObject inst)
+    //{
+    //    uiManager.DisplayNextPawn(inst);
+    //}
 
     /// <summary>
     /// Receive inputs from keyboard WASD
@@ -560,7 +496,7 @@ public class PlayerController : NetworkBehaviour
     [ClientRpc]
     public void RpcLivePreviewPawn(Vector3 hitPreview)
     {
-        pawnInstances[levelManager.nextPawnIndex].transform.position = hitPreview + Vector3.up * .95f;
+        levelManager.pawnInstances[levelManager.pawnInstances.Count - 1].transform.position = hitPreview + Vector3.up * .95f;
     }
 
 }
