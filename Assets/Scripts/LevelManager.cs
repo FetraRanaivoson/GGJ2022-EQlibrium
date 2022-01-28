@@ -140,21 +140,11 @@ public class LevelManager : NetworkBehaviour
 
     /// <summary>
     /// The function to be called by the network manager to display next pawn
+    /// server ---> command ----> rpc
     /// </summary>
-    
     public void DisplayNextPawn()
     {
-        CmdDisplayNextPawn();
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    [Command(requiresAuthority = false)]
-    private void CmdDisplayNextPawn()
-    {
         SrvDisplayNextPawn();
-        
     }
 
     /// <summary>
@@ -170,20 +160,22 @@ public class LevelManager : NetworkBehaviour
         NetworkServer.Spawn(pawnInstance);
         pawnInstances.Add(pawnInstance);
 
-        SrvOnDisplayNextPawn(nextPawnObject);
+        CmdDisplayNextPawn(pawnInstance);
     }
 
     /// <summary>
-    /// The command run for all cients when the pawn is spawned: collider set, kinematic set, gravity set, ui display set.
+    /// 
     /// </summary>
-    //[Server]
-    private void SrvOnDisplayNextPawn(GameObject inst)
+    [Command(requiresAuthority = false)]
+    private void CmdDisplayNextPawn(GameObject pawn)
     {
-        RpcEnableCollider(inst, false);
-        RpcIsKinematic(inst, true);
-        RpcToggleGravity(inst, false);
-        RpcDisplayNextPawn(inst);
+        RpcEnableCollider(pawn, false);
+        RpcIsKinematic(pawn, true);
+        RpcToggleGravity(pawn, false);
+        RpcDisplayNextPawn(pawn);
+
     }
+
 
     /// <summary>
     /// The collider configuration to be made for the spawned object to all clients

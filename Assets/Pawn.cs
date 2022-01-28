@@ -31,6 +31,7 @@ public class Pawn : NetworkBehaviour
     /// <summary>
     /// The method to let us use gravity or not for this pawn
     /// </summary>
+    [ClientRpc]
     public void UseGravity(bool state)
     {
         rb.useGravity = state;
@@ -39,6 +40,7 @@ public class Pawn : NetworkBehaviour
     /// <summary>
     /// The method that makes this object dynamic or kinematic
     /// </summary>
+    [ClientRpc]
     public void IsKinematic(bool state)
     {
         rb.isKinematic = state;
@@ -47,6 +49,7 @@ public class Pawn : NetworkBehaviour
     /// <summary>
     /// The method that makes this object collidable or not
     /// </summary>
+    [ClientRpc]
     public void EnableCollider(bool state)
     {
         c.enabled = state;
@@ -85,7 +88,7 @@ public class Pawn : NetworkBehaviour
         if (gameObject.CompareTag("Ground"))
         {
             SrvDestroyMe();
-            //return;
+            return;
         }
 
         else if (!gameObject.CompareTag("Pawn") || !gameObject.CompareTag("Ground"))
@@ -103,13 +106,14 @@ public class Pawn : NetworkBehaviour
     private void SrvDestroyMe()
     {
         levelManager.CmdRemovePawn(this.gameObject);
-        RpcDestroyMe();   
+        NetworkServer.Destroy(this.gameObject);
+        //RpcDestroyMe();   
     }
 
     [ClientRpc]
     private void RpcDestroyMe()
     {
-        NetworkServer.Destroy(this.gameObject);
+        
     }
 
     /// <summary>

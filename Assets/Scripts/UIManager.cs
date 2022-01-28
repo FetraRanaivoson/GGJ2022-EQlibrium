@@ -42,6 +42,7 @@ public class UIManager : NetworkBehaviour
     /// <summary>
     /// The method to get any pawn object be displayed on the UI
     /// </summary>
+    [ClientRpc]
     public void DisplayNextPawn(GameObject gameObject)
     {
         //Debug.Log(obj);
