@@ -1,5 +1,6 @@
 using Cinemachine;
 using Mirror;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -11,6 +12,7 @@ public class PlayerController : NetworkBehaviour
     SoundManager soundManager;
     HelperManager helperManager;
     LevelManager levelManager;
+    ThePlayerUI playerUI;
 
     Vector2 moveDir;
     public float torqueAmount;
@@ -27,6 +29,12 @@ public class PlayerController : NetworkBehaviour
     void Start()
     {
         PickCamera();
+
+        if (isLocalPlayer)
+        {
+            playerUI = FindObjectOfType<ThePlayerUI>();
+        }
+
     }
 
     /// <summary>
@@ -83,6 +91,29 @@ public class PlayerController : NetworkBehaviour
     [SyncVar]
     [SerializeField]
     private List<PlayerController> Allplayers = new List<PlayerController>();
+
+    /// <summary>
+    /// The command run by the server to show pop up on this player
+    /// </summary>
+    [Server]
+    public void SrvShowPopUp(string message)
+    {
+        TargetShowPopUp(message);
+    }
+
+    /// <summary>
+    /// The response to show popup message 
+    /// as directed by the server ONLY FOR THIS MACHINE
+    /// </summary>
+    [TargetRpc]
+    private void TargetShowPopUp(string message)
+    {
+        bool isPopUpButtonsActive = false;
+        if (isServer)
+            isPopUpButtonsActive = true;
+
+        playerUI.ShowPopUp(message, isPopUpButtonsActive);
+    }
 
     /// <summary>The server method that gives to ALL players 
     /// the list of all available players in the world 

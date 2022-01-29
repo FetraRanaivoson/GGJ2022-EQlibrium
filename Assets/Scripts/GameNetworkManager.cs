@@ -6,11 +6,50 @@ using System;
 
 public class GameNetworkManager : NetworkManager
 {
+    /// <summary>
+    /// The list of all players
+    /// </summary>
     [SerializeField] List<PlayerController> players = new List<PlayerController>();
+
+    /// <summary>
+    /// The class responsible of the level which is composed by the 3 elements of the table
+    /// </summary>
     LevelManager levelManager;
+
+    /// <summary>
+    /// The class responsible for updating the UI: timer, score, pawn display
+    /// </summary>
     UIManager UIManager;
+
+    /// <summary>
+    /// The dead zone class represented by a box collider down the table
+    /// </summary>
     DeadZone deadZone;
+
+    /// <summary>
+    /// The class responsible of the timer
+    /// </summary>
     TimerManager timerManager;
+
+    /// <summary>
+    /// 0 means player 1, 1 means player 2
+    /// </summary>
+    int nextTurn = 0;
+
+    /// <summary>
+    /// Should we randomize the another pawn?
+    /// </summary>
+    bool shouldRandomizeNextPawn = true;
+
+    /// <summary>
+    /// Did the timer in the timer manager started
+    /// </summary>
+    bool timerStarts = false;
+
+    /// <summary>
+    /// The max score needed to win the game
+    /// </summary>
+    int MAX_SCORE = 2;
 
     public override void OnServerAddPlayer(NetworkConnection conn)
     {
@@ -47,21 +86,7 @@ public class GameNetworkManager : NetworkManager
 
     }
 
-    public override void OnServerChangeScene(string newSceneName)
-    {
-    }
-
-    /// <summary>
-    /// 0 means player 1, 1 means player 2
-    /// </summary>
-    int nextTurn = 0;
-
-    /// <summary>
-    /// Randomize once until the current player ends its turn
-    /// </summary>
-    bool shouldRandomizeNextPawn = true;
-    bool timerStarts = false;
-
+    bool aPlayerWin = false;
 
     private void Update()
     {
@@ -71,10 +96,28 @@ public class GameNetworkManager : NetworkManager
             {
                 if (players[i] != null && NetworkServer.active)
                     players[i].SetOpponents(players);
+
+                // Reaches max score?
+                if (players[i].score == MAX_SCORE)
+                {
+                    aPlayerWin = true;
+                    players[i].SrvShowPopUp("You win!");
+                    if (i == 0)
+                        players[i + 1].SrvShowPopUp("You lose");
+                    else
+                        players[i - 1].SrvShowPopUp("You lose");
+                    players[0].OnPauseGame();
+                }
             }
-        
-    
-           
+
+            //if (aPlayerWin)
+            //{
+            //    if (NetworkServer.active)
+            //    {
+                    
+            //    }
+            //}
+
 
             // Wait until everything settle
             if (timerStarts)
@@ -87,18 +130,10 @@ public class GameNetworkManager : NetworkManager
             {
                 if (levelManager != null)
                 {
-                    //levelManager.ResetLevel(false);
                     levelManager.SetNextPawn();
                     shouldRandomizeNextPawn = false;
-
                     levelManager.DisplayNextPawn();
                 }
-                // TO DO: shouldn't be only for one and then rpc?
-                //for (int i = 0; i < players.Count; i++)
-                //{
-                //players[i].DisplayNextPawn(levelManager.nextPawn[0]);
-
-                //}
             }
 
             //  Setting turn
@@ -110,25 +145,60 @@ public class GameNetworkManager : NetworkManager
                 }
             }
 
-            // Change turn handler
             if (players.Count == 2)
             {
+                //  We need to constantly verify on update if the table falls
+                if (deadZone.isTouched)
+                {
+                    OnTableFalling();
+                }
                 if (players[nextTurn].placedPawn[0])
                 {
                     //  Temporarily deactivate
                     players[nextTurn].SrvSetTurn(false);
                     //  Wait ?
                     timerStarts = true;
-                    StartCoroutine(WaitToSettle());
+                    StartCoroutine(WaitTableToSettle());
                 }
             }
         }
     }
 
     /// <summary>
+    /// The logic when the table has fallen
+    /// </summary>
+    private void OnTableFalling()
+    {
+        // To prevent going here many times
+        deadZone.isTouched = false;
+
+        // Reset timer
+        timerManager.SrvStartTimer(false);
+        timerManager.SrvTimerEnds(true);
+        UIManager.FadeTimer();
+
+        //  Increase player score
+        SetScore();
+
+        //  Delete the platform
+        levelManager.DestroyPlatform();
+
+        //  TODO: destroy pawns
+        // Wait for everything to be destroyed then spawn another platform
+        StartCoroutine(WaitForDestructionOnTheGround());
+
+        //  To let us randomize pawn again
+        timerStarts = false;
+        shouldRandomizeNextPawn = true;
+
+        // Set the next turn
+        ChangeTurn();
+    }
+
+    /// <summary>
     /// The logic when waiting for every physics to settle
     /// </summary>
-    IEnumerator WaitToSettle()
+    IEnumerator WaitTableToSettle()
     {
         timerManager.SrvStartTimer(true);
         timerManager.SrvTimerEnds(false);
@@ -150,36 +220,26 @@ public class GameNetworkManager : NetworkManager
                 UIManager.FadeTimer();
 
                 //  Increase player score
-                if (nextTurn == 0)
-                {
-                    players[nextTurn + 1].SetScore();
-                }
-                else
-                {
-                    players[nextTurn - 1].SetScore();
-                }
+                SetScore();
 
                 //  Delete the platform
                 levelManager.DestroyPlatform();
 
                 // Wait for everything to be destroyed then spawn another platform
-                StartCoroutine(WaitForDestruction());
+                StartCoroutine(WaitForDestructionOnTheGround());
 
                 //  To let us randomize pawn again
                 timerStarts = false;
                 shouldRandomizeNextPawn = true;
 
                 // Set the next turn
-                players[nextTurn].SrvSetTurn(false);
-                if (nextTurn == 0)
-                    nextTurn++;
-                else
-                    nextTurn--;
+                ChangeTurn();
 
                 yield break;
             }
             yield return null;
         }
+
         //  In case timer ends without touching the dead zone
         // Reset timer
         timerManager.SrvStartTimer(false);
@@ -194,16 +254,42 @@ public class GameNetworkManager : NetworkManager
         deadZone.isTouched = false;
 
         // Set the next turn
+        ChangeTurn();
+    }
+
+    /// <summary>
+    /// The function that changes the score
+    /// </summary>
+    private void SetScore()
+    {
+        if (nextTurn == 0)
+        {
+            players[nextTurn + 1].SetScore();
+        }
+        else
+        {
+            players[nextTurn - 1].SetScore();
+        }
+    }
+
+    /// <summary>
+    /// The function that changes a turn
+    /// </summary>
+    private void ChangeTurn()
+    {
         players[nextTurn].SrvSetTurn(false);
         if (nextTurn == 0)
             nextTurn++;
         else
             nextTurn--;
-
-
     }
 
-    IEnumerator WaitForDestruction()
+    /// <summary>
+    /// To be used after deleting the existing platform, this is
+    /// the coroutine that waits until all pawns are destroyed in order
+    /// to instantiate a new platform
+    /// </summary>
+    IEnumerator WaitForDestructionOnTheGround()
     {
         do
         {

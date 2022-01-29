@@ -82,7 +82,7 @@ public class Pawn : NetworkBehaviour
     /// <summary>
     /// The command on collision
     /// </summary>
-    [Command(requiresAuthority = false)]
+    //[Command(requiresAuthority = false)]
     public void CmdOnCollisionEnter(GameObject gameObject)
     {
         if (gameObject.CompareTag("Ground"))
