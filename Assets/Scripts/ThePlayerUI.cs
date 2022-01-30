@@ -19,67 +19,66 @@ public class ThePlayerUI : NetworkBehaviour
     private void Awake()
     {
         levelManager = FindObjectOfType<LevelManager>();
+
     }
 
     void Start()
     {
         mainMenuButton.onClick.AddListener(NetworkManager.singleton.StopHost);
 
-        //  THIS WILL BE USEFUL LATER FOR BUTTON INTERACTIONS
-            restartButton.onClick.AddListener(()=>CmdDestroyPlatform());
+        //  THIS WILL BE USEFUL LATER FOR BUTTON INTERACTIONS : NOT WORKING !!!!
+        //restartButton.onClick.AddListener(() => CmdDestroyPlatform());
     }
 
+    bool isPickedPlayers = false;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    [Command(requiresAuthority = false)]
-    private void CmdDestroyPlatform()
+    private void Update()
     {
-        //  Unpause?
-
-        //  Instantiate new platform
-        SrvInstantiatePlatform();
-
-        //  Reset all scores to zero
-        players = FindObjectsOfType<PlayerController>();
-        for (int i = 0; i < players.Length; i++)
+        if (!isPickedPlayers)
         {
-            players[i].SetScore(0);
+            players = FindObjectsOfType<PlayerController>();
+            if (players.Length == 2)
+                isPickedPlayers = true;
         }
 
-        //  Disable popup panel for all players
-        RpcSetPopUpVisible(false);
+        if (restartButton.GetComponent<RestartButton>().isSelected)
+        {
+            //  Unpause will instantiate another platform automatically
+            //  after all pawns are touching the ground
+            players[0].OnUnPauseGame();
+
+            //  Reset all scores to zero
+            for (int i = 0; i < players.Length; i++)
+            {
+                //Debug.Log("inside " + i + " times!");
+                players[i].SetScore(0);
+            }
+
+            //  Disable popup panel for all players
+            CmdSetPopUpVisible(false);
+
+            // Reset the bool to false to prevent this from always running
+            restartButton.GetComponent<RestartButton>().isSelected = false;
+        }
 
     }
 
     /// <summary>
-    /// 
+    /// The command to set the popup visible
+    /// </summary>
+    [Command(requiresAuthority = false)]
+    private void CmdSetPopUpVisible(bool state)
+    {
+        RpcSetPopUpVisible(state);
+    }
+
+    /// <summary>
+    /// The rpc that set the popup visible for all clients
     /// </summary>
     [ClientRpc]
     private void RpcSetPopUpVisible(bool state)
     {
         popUpPanel.SetActive(state);
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    [Server]
-    private void SrvInstantiatePlatform()
-    {
-        levelManager.InstantiatePlatform();
-        foreach (var item in players)
-        {
-
-        }
-
-    }
-
-
-    public void OnClick()
-    {
-        //Debug.Log("clicked button");
     }
 
 
