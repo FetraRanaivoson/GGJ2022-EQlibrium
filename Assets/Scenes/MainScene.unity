@@ -146,6 +146,10 @@ PrefabInstance:
       propertyPath: m_fontStyle
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 800214499, guid: 45e258797d5e16548bf9daddeead6c05, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1930898460, guid: 45e258797d5e16548bf9daddeead6c05, type: 3}
       propertyPath: m_SizeDelta.y
       value: 764.4
@@ -162,9 +166,33 @@ PrefabInstance:
       propertyPath: sceneId
       value: 1840350749
       objectReference: {fileID: 0}
+    - target: {fileID: 8257533928369565333, guid: 45e258797d5e16548bf9daddeead6c05, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 9c43e3623535fab49b79daba6e3a8ff3, type: 3}
+    - target: {fileID: 8257533928369565333, guid: 45e258797d5e16548bf9daddeead6c05, type: 3}
+      propertyPath: m_Color.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8257533928369565333, guid: 45e258797d5e16548bf9daddeead6c05, type: 3}
+      propertyPath: m_Color.g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8257533928369565333, guid: 45e258797d5e16548bf9daddeead6c05, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8257533928369565335, guid: 45e258797d5e16548bf9daddeead6c05, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8257533929167103326, guid: 45e258797d5e16548bf9daddeead6c05, type: 3}
       propertyPath: m_Name
       value: UIManager
+      objectReference: {fileID: 0}
+    - target: {fileID: 8257533929167103326, guid: 45e258797d5e16548bf9daddeead6c05, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8257533929167103330, guid: 45e258797d5e16548bf9daddeead6c05, type: 3}
       propertyPath: m_Pivot.x
@@ -601,7 +629,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-48956
+  m_Name: pb_Mesh-80332
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2

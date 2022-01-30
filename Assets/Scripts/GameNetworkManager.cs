@@ -54,7 +54,7 @@ public class GameNetworkManager : NetworkManager
     /// <summary>
     /// The max score needed to win the game
     /// </summary>
-    int MAX_SCORE = 2;
+    int MAX_SCORE = 5;
 
 
     public override void OnServerAddPlayer(NetworkConnection conn)
@@ -149,7 +149,7 @@ public class GameNetworkManager : NetworkManager
                 {
                     timerStarts = true;
                     OnTableFalling();
-                    return;
+                    //return;
                 }
                 if (players[nextTurn].placedPawn[0])
                 {
