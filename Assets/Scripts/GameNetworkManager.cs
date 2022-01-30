@@ -86,8 +86,6 @@ public class GameNetworkManager : NetworkManager
 
     }
 
-    bool aPlayerWin = false;
-
     private void Update()
     {
         if (NetworkServer.active && players.Count > 1)
@@ -100,7 +98,6 @@ public class GameNetworkManager : NetworkManager
                 // Reaches max score?
                 if (players[i].score == MAX_SCORE)
                 {
-                    aPlayerWin = true;
                     players[i].SrvShowPopUp("You win!");
                     if (i == 0)
                         players[i + 1].SrvShowPopUp("You lose!");
@@ -109,15 +106,6 @@ public class GameNetworkManager : NetworkManager
                     players[0].OnPauseGame();
                 }
             }
-
-            //if (aPlayerWin)
-            //{
-            //    if (NetworkServer.active)
-            //    {
-                    
-            //    }
-            //}
-
 
             // Wait until everything settle
             if (timerStarts)
@@ -150,7 +138,9 @@ public class GameNetworkManager : NetworkManager
                 //  We need to constantly verify on update if the table falls
                 if (deadZone.isTouched)
                 {
+                    timerStarts = true;
                     OnTableFalling();
+                    return;
                 }
                 if (players[nextTurn].placedPawn[0])
                 {
@@ -188,8 +178,8 @@ public class GameNetworkManager : NetworkManager
         StartCoroutine(WaitForDestructionOnTheGround());
 
         //  To let us randomize pawn again
-        timerStarts = false;
-        shouldRandomizeNextPawn = true;
+        //timerStarts = false;
+        //shouldRandomizeNextPawn = true;
 
         // Set the next turn
         ChangeTurn();
@@ -229,8 +219,8 @@ public class GameNetworkManager : NetworkManager
                 StartCoroutine(WaitForDestructionOnTheGround());
 
                 //  To let us randomize pawn again
-                timerStarts = false;
-                shouldRandomizeNextPawn = true;
+                //timerStarts = false;
+                //shouldRandomizeNextPawn = true;
 
                 // Set the next turn
                 ChangeTurn();
@@ -297,5 +287,8 @@ public class GameNetworkManager : NetworkManager
         } while (levelManager.pawnInstances.Count > 1);
         yield return new WaitForSeconds(1.5f);
         levelManager.InstantiatePlatform();
+
+        timerStarts = false;
+        shouldRandomizeNextPawn = true;
     }
 }

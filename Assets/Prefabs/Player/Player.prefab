@@ -68,8 +68,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  torqueAmount: 15
+  torqueAmount: 10
   displayName: No name
+  score: 0
   Allplayers: []
   mousePos: {x: 0, y: 0, z: 0}
 --- !u!114 &7074766620655772361

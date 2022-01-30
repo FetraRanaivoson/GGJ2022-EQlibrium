@@ -130,6 +130,34 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 9156065, guid: 45e258797d5e16548bf9daddeead6c05, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 764.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 9156065, guid: 45e258797d5e16548bf9daddeead6c05, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 159.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 9156065, guid: 45e258797d5e16548bf9daddeead6c05, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9156066, guid: 45e258797d5e16548bf9daddeead6c05, type: 3}
+      propertyPath: m_fontStyle
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1930898460, guid: 45e258797d5e16548bf9daddeead6c05, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 764.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 1930898460, guid: 45e258797d5e16548bf9daddeead6c05, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 33.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1930898461, guid: 45e258797d5e16548bf9daddeead6c05, type: 3}
+      propertyPath: m_fontStyle
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1692501654677884263, guid: 45e258797d5e16548bf9daddeead6c05, type: 3}
       propertyPath: sceneId
       value: 1840350749
@@ -573,7 +601,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-767664
+  m_Name: pb_Mesh-48956
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
