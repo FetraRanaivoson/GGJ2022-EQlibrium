@@ -103,9 +103,9 @@ public class GameNetworkManager : NetworkManager
                     aPlayerWin = true;
                     players[i].SrvShowPopUp("You win!");
                     if (i == 0)
-                        players[i + 1].SrvShowPopUp("You lose");
+                        players[i + 1].SrvShowPopUp("You lose!");
                     else
-                        players[i - 1].SrvShowPopUp("You lose");
+                        players[i - 1].SrvShowPopUp("You lose!");
                     players[0].OnPauseGame();
                 }
             }
@@ -126,7 +126,7 @@ public class GameNetworkManager : NetworkManager
             }
 
             // Then randomize next pawn
-            if (shouldRandomizeNextPawn && players.Count == 2)
+            if (shouldRandomizeNextPawn /*&& players.Count == 2*/)
             {
                 if (levelManager != null)
                 {

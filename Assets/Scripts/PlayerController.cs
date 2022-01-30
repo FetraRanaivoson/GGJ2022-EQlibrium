@@ -64,6 +64,11 @@ public class PlayerController : NetworkBehaviour
     {
         score++;
     }
+    [Server]
+    public void SetScore(int score)
+    {
+        this.score = score;
+    }
 
     // The hook attribute can be used to specify a function
     // to be called when the SyncVar changes value on the client.
@@ -108,11 +113,11 @@ public class PlayerController : NetworkBehaviour
     [TargetRpc]
     private void TargetShowPopUp(string message)
     {
-        bool isPopUpButtonsActive = false;
+        bool canActivatePopUpButtons = false;
         if (isServer)
-            isPopUpButtonsActive = true;
+            canActivatePopUpButtons = true;
 
-        playerUI.ShowPopUp(message, isPopUpButtonsActive);
+        playerUI.ShowPopUp(message, canActivatePopUpButtons);
     }
 
     /// <summary>The server method that gives to ALL players 
@@ -291,7 +296,7 @@ public class PlayerController : NetworkBehaviour
 
             //Get the move direction from keyboard and torque the next pawn
             //CmdTorque(moveDir, pawnInstances[levelManager.nextPawnIndex], torqueAmount, Time.deltaTime);
-            CmdTorque(moveDir, levelManager.pawnInstances[levelManager.pawnInstances.Count-1], torqueAmount, Time.deltaTime);
+            CmdTorque(moveDir, levelManager.pawnInstances[levelManager.pawnInstances.Count - 1], torqueAmount, Time.deltaTime);
 
             //if (pawnInstances[levelManager.nextPawnIndex].GetComponent<Pawn>().previewTrigger.isTriggeringPawn)
             if (levelManager.pawnInstances.Count == 0)
@@ -328,22 +333,13 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
-  
+
     /// <summary>
     /// The function to be called when placing a pawn
     /// </summary>
     private void PlacePawn(Vector3 hitPoint)
     {
         CmdPlacePawn(hitPoint);
-    }
-
-    /// <summary>
-    /// The command requested on the server in order to place a pawn
-    /// </summary>
-    [Command(requiresAuthority = false)]
-    private void CmdPlacePawn(Vector3 hitPoint)
-    {
-        SrvPlacePawn(hitPoint);
     }
 
     /// <summary>
@@ -354,7 +350,7 @@ public class PlayerController : NetworkBehaviour
     {
         //pawnInstances[levelManager.nextPawnIndex].transform.position = hitPoint;
         levelManager.pawnInstances[levelManager.pawnInstances.Count - 1].transform.position = hitPoint;
-        
+
         //NetworkServer.Spawn(pawnObj);
         //RpcToggleGravity(pawnObj, true);
 
@@ -369,13 +365,23 @@ public class PlayerController : NetworkBehaviour
 
         //RpcOnPlacingPawnSound(pawnInstances[levelManager.nextPawnIndex]);
         RpcOnPlacingPawnSound(levelManager.pawnInstances[levelManager.pawnInstances.Count - 1]);
+
+    }
+
+    /// <summary>
+    /// The command requested on the server in order to place a pawn
+    /// </summary>
+    [Command(requiresAuthority = false)]
+    private void CmdPlacePawn(Vector3 hitPoint)
+    {
+        SrvPlacePawn(hitPoint);
     }
 
 
     /// <summary>
     /// The gravity configuration to be made for the spawned object to all clients
     /// </summary>
-    [ClientRpc]
+    //[ClientRpc]
     public void RpcToggleGravity(GameObject pawnObj, bool state)
     {
         pawnObj.GetComponent<Pawn>().UseGravity(state);
@@ -383,7 +389,7 @@ public class PlayerController : NetworkBehaviour
     /// <summary>
     /// The dynamic configuration to be made for the spawned object to all clients
     /// </summary>
-    [ClientRpc]
+    //[ClientRpc]
     public void RpcIsKinematic(GameObject pawnObj, bool state)
     {
         pawnObj.GetComponent<Pawn>().IsKinematic(state);
@@ -391,7 +397,7 @@ public class PlayerController : NetworkBehaviour
     /// <summary>
     /// The collider configuration to be made for the spawned object to all clients
     /// </summary>
-    [ClientRpc]
+    //[ClientRpc]
     public void RpcEnableCollider(GameObject pawnObj, bool state)
     {
         pawnObj.GetComponent<Pawn>().EnableCollider(state);
@@ -400,7 +406,7 @@ public class PlayerController : NetworkBehaviour
     /// <summary>
     /// The alert sound to be sent to all clients when a pawn is placed
     /// </summary>
-    [ClientRpc]
+    //[ClientRpc]
     private void RpcOnPlacingPawnSound(GameObject pawnObj)
     {
         soundManager.OnPlacingPawn(pawnObj);

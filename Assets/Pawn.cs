@@ -58,6 +58,7 @@ public class Pawn : NetworkBehaviour
     /// <summary>
     /// The method to be called play the sound od this object
     /// </summary>
+    [ClientRpc]
     public void OnPlacedSound()
     {
         audioSource.clip = placedClip[0];
@@ -96,7 +97,7 @@ public class Pawn : NetworkBehaviour
             SrvOnColllisionEnterSound();
         }
 
-       
+
     }
 
     /// <summary>
@@ -110,32 +111,34 @@ public class Pawn : NetworkBehaviour
         //RpcDestroyMe();   
     }
 
-    [ClientRpc]
-    private void RpcDestroyMe()
-    {
-        
-    }
 
     /// <summary>
     /// The server response to play collision sounds
     /// </summary>
-    [Server]
+    //[Server]////////////////////////////////////////////////////////
     private void SrvOnColllisionEnterSound()
     {
-        ClientOnCollisionEnterSound();
+        CmdOnCollisionEnterSound();
     }
 
-   
+
 
     /// <summary>
     /// The function that let play collision sound of this object to all clients
     /// </summary>
+    [Command(requiresAuthority = false)]///////////////////////////////////
+    private void CmdOnCollisionEnterSound()
+    {
+        RpcOnCollisionEnterSound();
+    }
+
     [ClientRpc]
-    private void ClientOnCollisionEnterSound()
+    private void RpcOnCollisionEnterSound()
     {
         audioSource.clip = placedClip[UnityEngine.Random.Range(0, placedClip.Length)];
         audioSource.Play();
     }
+
 
     /// <summary>
     /// The torque function for this pawn
