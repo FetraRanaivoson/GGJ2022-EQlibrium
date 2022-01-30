@@ -32,6 +32,11 @@ public class GameNetworkManager : NetworkManager
     TimerManager timerManager;
 
     /// <summary>
+    /// The class responsible of the background music
+    /// </summary>
+    Music music;
+
+    /// <summary>
     /// 0 means player 1, 1 means player 2
     /// </summary>
     int nextTurn = 0;
@@ -50,6 +55,7 @@ public class GameNetworkManager : NetworkManager
     /// The max score needed to win the game
     /// </summary>
     int MAX_SCORE = 2;
+
 
     public override void OnServerAddPlayer(NetworkConnection conn)
     {
@@ -74,6 +80,7 @@ public class GameNetworkManager : NetworkManager
             UIManager = FindObjectOfType<UIManager>();
             deadZone = FindObjectOfType<DeadZone>();
             timerManager = FindObjectOfType<TimerManager>();
+            music = FindObjectOfType<Music>();
         }
         // In case 2 players exist
         if (NetworkServer.active && players.Count > 1)
@@ -82,6 +89,8 @@ public class GameNetworkManager : NetworkManager
             players[0].OnNotWaitingForOpponent();
 
             levelManager.InstantiatePlatform();
+
+            music.SrvPlayBackground();
         }
 
     }
